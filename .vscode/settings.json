@@ -7,4 +7,20 @@
 	"[sql]": {
 		"editor.defaultFormatter": "adpyke.vscode-sql-formatter"
 	},
+	"sqltools.connections": [
+		{
+			"mysqlOptions": {
+				"authProtocol": "default",
+				"enableSsl": "Disabled"
+			},
+			"previewLimit": 50,
+			"server": "localhost",
+			"port": 3306,
+			"driver": "MySQL",
+			"name": "petClinic",
+			"database": "petClinic",
+			"username": "app",
+			"password": "1234"
+		}
+	],
 }
