@@ -1,0 +1,28 @@
+{{define "title"}}
+Owners
+{{end}}
+
+{{define "main"}}
+<h1>Owner Page</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Email</th>
+            <th>Birthdate</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><a href="#" class="btn btn-outline-primary">Bong Lee</a></td>
+            <td>702-885-7091</td>
+            <td>test@test.com</td>
+            <td>03/14/1991</td>
+        </tr>
+    </tbody>
+</table>
+
+<a href="/owner/create" class="btn btn-primary" role="button">Create New Owner</a>
+{{end}}
