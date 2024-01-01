@@ -35,3 +35,9 @@
 - Veterinarian
     - Name
     - visits
+
+
+## DB Migration commands
+- migrate create -ext .sql -dir ./migrations <name>
+- migrate -source file://migrations -database mysql://app:1234@/petClinic up
+- migrate -source file://migrations -database mysql://app:1234@/petClinic down

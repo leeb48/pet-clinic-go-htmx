@@ -1,0 +1,13 @@
+CREATE TABLE owners (
+    id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    firstName VARCHAR(255) NOT NULL,
+    lastName VARCHAR(255) NOT NULL,
+    address VARCHAR(255) NOT NULL,
+    state VARCHAR(255) NOT NULL,
+    city VARCHAR(255) NOT NULL,
+    phoneNumber VARCHAR(10) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    pasword CHAR(60) NOT NULL,
+    birthdate DATE NOT NULL,
+    created DATETIME NOT NULL
+);
