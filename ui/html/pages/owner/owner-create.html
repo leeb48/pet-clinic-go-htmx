@@ -7,18 +7,18 @@ Owner Create
 
 <div id="error-alert"></div>
 
-<form hx-post='/owner' hx-ext='json-enc'>
+<form hx-post='/owner/create' hx-ext='json-enc'>
     <div class="row mb-3">
         <div class="col">
             <label for="firstName" class="form-label">First name</label>
-            <input type="text" class="form-control" id="firstName" name="firstName" placeholder="First name" required>
+            <input type="text" class="form-control" id="firstName" name="FirstName" placeholder="First name" required>
         </div>
         <div class="col">
             <label for="lastName" class="form-label">Last name</label>
             <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Last name" required>
         </div>
     </div>
-    <div class="row mb-3">
+    <!-- <div class="row mb-3">
         <div class="col">
             <label for="email" class="form-label">Email address</label>
             <input class="form-control" id="email" name="email" placeholder="name@example.com" required>
@@ -28,9 +28,9 @@ Owner Create
             <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" placeholder="#" minlength="10"
                 maxlength="10" required>
         </div>
-    </div>
+    </div> -->
 
-    <div class="mb-3">
+    <!-- <div class="mb-3">
         <label for="birthdate" class="form-label">Birthdate</label>
         <input type="date" class="form-control" id="birthdate" name="birthdate" required>
     </div>
@@ -130,7 +130,7 @@ Owner Create
                 </td>
             </tr>
         </tbody>
-    </table>
+    </table> -->
 
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>

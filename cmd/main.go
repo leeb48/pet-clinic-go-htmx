@@ -2,11 +2,13 @@ package main
 
 import (
 	"database/sql"
+	"flag"
 	"html/template"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -16,14 +18,23 @@ type application struct {
 	templateCache map[string]*template.Template
 }
 
+type config struct {
+	addr string
+	dsn  string
+}
+
 func main() {
+
+	var cfg config
+	flag.StringVar(&cfg.addr, "addr", ":7771", "HTTP network address")
+	flag.StringVar(&cfg.dsn, "dsn", "app:1234@/petClinic?parseTime=true&multiStatements=true", "MySQL data source name")
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 		AddSource: true,
 		Level:     slog.LevelDebug,
 	}))
 
-	db, err := openDB("app:1234@/petClinic?parseTime=true&multiStatements=true")
+	db, err := openDB(cfg.dsn)
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
@@ -41,7 +52,16 @@ func main() {
 		templateCache: templateCache,
 	}
 
-	err = http.ListenAndServe(":7771", app.routes())
+	server := http.Server{
+		Addr:         cfg.addr,
+		Handler:      app.routes(),
+		ErrorLog:     slog.NewLogLogger(logger.Handler(), slog.LevelError),
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
+
+	err = server.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 	if err != nil {
 		log.Fatal(err)
 	}
