@@ -23,7 +23,7 @@ func main() {
 		Level:     slog.LevelDebug,
 	}))
 
-	db, err := openDB("app:1234@/petClinic?parseTime=true")
+	db, err := openDB("app:1234@/petClinic?parseTime=true&multiStatements=true")
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
