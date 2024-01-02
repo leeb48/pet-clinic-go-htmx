@@ -5,44 +5,67 @@ Owner Create
 {{define "main"}}
 <h1>Owner Create Form</h1>
 
-<div id="error-alert"></div>
-
-<form hx-post='/owner/create' hx-ext='json-enc'>
+<form hx-post='/owner/create' hx-ext='json-enc' hx-target="body" novalidate>
     <div class="row mb-3">
         <div class="col">
             <label for="firstName" class="form-label">First name</label>
-            <input type="text" class="form-control" id="firstName" name="FirstName" placeholder="First name" required>
+            <input type="text" class="form-control" id="firstName" name="firstName" placeholder="First name"
+                value="{{.Form.FirstName}}" required>
+            {{with .Form.FieldErrors.firstName}}
+            <div class="form-text text-danger">{{.}}</div>
+            {{end}}
         </div>
         <div class="col">
             <label for="lastName" class="form-label">Last name</label>
-            <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Last name" required>
+            <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Last name"
+                value="{{.Form.LastName}}" required>
+            {{with .Form.FieldErrors.lastName}}
+            <div class="form-text text-danger">{{.}}</div>
+            {{end}}
         </div>
     </div>
-    <!-- <div class="row mb-3">
+    <div class="row mb-3">
         <div class="col">
             <label for="email" class="form-label">Email address</label>
-            <input class="form-control" id="email" name="email" placeholder="name@example.com" required>
+            <input class="form-control" id="email" name="email" placeholder="name@example.com" value="{{.Form.Email}}"
+                required>
+            {{with .Form.FieldErrors.email}}
+            <div class="form-text text-danger">{{.}}</div>
+            {{end}}
         </div>
         <div class="col">
-            <label for="phoneNumber" class="form-label">Phone</label>
-            <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber" placeholder="#" minlength="10"
-                maxlength="10" required>
+            <label for="phone" class="form-label">Phone</label>
+            <input type="tel" class="form-control" id="phone" name="phone" placeholder="#" minlength="10" maxlength="10"
+                value="{{.Form.Phone}}" required>
+            {{with .Form.FieldErrors.phone}}
+            <div class="form-text text-danger">{{.}}</div>
+            {{end}}
         </div>
-    </div> -->
+    </div>
 
-    <!-- <div class="mb-3">
+    <div class="mb-3">
         <label for="birthdate" class="form-label">Birthdate</label>
-        <input type="date" class="form-control" id="birthdate" name="birthdate" required>
+        <input type="date" class="form-control" id="birthdate" name="birthdate" value="{{.Form.Birthdate}}" required>
+        {{with .Form.FieldErrors.birthdate}}
+        <div class="form-text text-danger">{{.}}</div>
+        {{end}}
     </div>
 
     <div class="mb-3">
         <label for="address" class="form-label">Address</label>
-        <input type="text" class="form-control" id="address" name='address' placeholder="Stree Address" required>
+        <input type="text" class="form-control" id="address" name='address' placeholder="Stree Address"
+            value="{{.Form.Address}}" required>
+        {{with .Form.FieldErrors.address}}
+        <div class="form-text text-danger">{{.}}</div>
+        {{end}}
     </div>
     <div class="row mb-3">
         <div class="col">
             <label for="city" class="form-label">City</label>
-            <input type="text" class="form-control" id="city" name="city" required>
+            <input type="text" class="form-control" id="city" name="city" value="{{.Form.City}}" required>
+            {{with .Form.FieldErrors.city}}
+            <div class="form-text text-danger">{{.}}</div>
+            {{end}}
         </div>
         <div class="col">
             <label for="state" class="form-label">State</label>
@@ -100,12 +123,13 @@ Owner Create
                 <option value="WI">Wisconsin</option>
                 <option value="WY">Wyoming</option>
             </select>
+            {{with .Form.FieldErrors.state}}
+            <div class="form-text text-danger">{{.}}</div>
+            {{end}}
         </div>
     </div>
 
     <hr />
-
--->
 
     <table id="pet-table" class="table">
         <thead>

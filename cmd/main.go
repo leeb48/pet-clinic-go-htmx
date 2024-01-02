@@ -11,11 +11,13 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"pet-clinic.bonglee.com/internal/models"
 )
 
 type application struct {
 	logger        *slog.Logger
 	templateCache map[string]*template.Template
+	owners        models.OwnerModelInterface
 }
 
 type config struct {
@@ -50,6 +52,7 @@ func main() {
 	app := application{
 		logger:        logger,
 		templateCache: templateCache,
+		owners:        &models.OwnerModel{DB: db},
 	}
 
 	server := http.Server{
