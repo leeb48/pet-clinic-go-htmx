@@ -9,6 +9,7 @@ import (
 )
 
 type templateData struct {
+	Form any
 }
 
 func createTemplateCache() (map[string]*template.Template, error) {

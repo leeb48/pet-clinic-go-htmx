@@ -5,9 +5,8 @@ CREATE TABLE owners (
     address VARCHAR(255) NOT NULL,
     state VARCHAR(255) NOT NULL,
     city VARCHAR(255) NOT NULL,
-    phoneNumber VARCHAR(10) NOT NULL,
+    phone VARCHAR(10) NOT NULL,
     email VARCHAR(255) NOT NULL,
-    pasword CHAR(60) NOT NULL,
     birthdate DATE NOT NULL,
     created DATETIME NOT NULL
 );
