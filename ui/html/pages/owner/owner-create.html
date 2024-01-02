@@ -105,6 +105,8 @@ Owner Create
 
     <hr />
 
+-->
+
     <table id="pet-table" class="table">
         <thead>
             <tr>
@@ -117,26 +119,28 @@ Owner Create
         <tbody>
             <tr>
                 <th scope="row">
-                    <input type="text" class="form-control" id="pet-name-input" name="petName" placeholder="Pet Name">
+                    <input type="text" class="form-control" id="pet-name-input" placeholder="Pet Name">
                 </th>
                 <td>
-                    <input type="text" class="form-control" id="pet-type-input" name="petType" placeholder="Pet Type">
+                    <input type="text" class="form-control" id="pet-type-input" placeholder="Pet Type">
                 </td>
                 <td>
-                    <input type="date" class="form-control" id="pet-birthdate-input" name="petBirthdate">
+                    <input type="date" class="form-control" id="pet-birthdate-input">
                 </td>
                 <td>
                     <button id="add-pet-btn" class="btn btn-outline-success">Add</button>
                 </td>
             </tr>
         </tbody>
-    </table> -->
+    </table>
 
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
 
 
 <script>
+
+    let count = 0;
 
     document.getElementById('add-pet-btn').onclick = (e) => {
         e.preventDefault();
@@ -150,13 +154,14 @@ Owner Create
         const row = petTable.insertRow();
         const nameCell = row.insertCell(0);
         const petTypeCell = row.insertCell(1);
-        const birthdateCell = row.insertCell(2);
+        const petBirthdateCell = row.insertCell(2);
         const remove = row.insertCell(3);
 
-        nameCell.innerHTML = petName;
-        petTypeCell.innerHTML = petType;
-        birthdateCell.innerHTML = petBirthdate;
+        nameCell.innerHTML = `<input class="form-control-plaintext" type="text" name="petName" value=${petName} readonly>`
+        petTypeCell.innerHTML = `<input class="form-control-plaintext" type="text" name="petType" value=${petType} readonly>`
+        petBirthdateCell.innerHTML = `<input class="form-control-plaintext" type="text" name="petBirthdate" value=${petBirthdate} readonly>`
         remove.innerHTML = `<button class="btn btn-outline-danger">X</button>`
+        count++
     }
 
     document.querySelector('form').addEventListener('htmx:responseError', function (event) {
