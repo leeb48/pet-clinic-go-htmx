@@ -18,6 +18,7 @@ type application struct {
 	logger        *slog.Logger
 	templateCache map[string]*template.Template
 	owners        models.OwnerModelInterface
+	petTypes      models.PetTypeModelInterface
 }
 
 type config struct {
@@ -53,6 +54,7 @@ func main() {
 		logger:        logger,
 		templateCache: templateCache,
 		owners:        &models.OwnerModel{DB: db},
+		petTypes:      &models.PetTypeModel{DB: db},
 	}
 
 	server := http.Server{

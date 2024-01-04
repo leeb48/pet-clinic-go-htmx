@@ -2,12 +2,9 @@ package models
 
 import "time"
 
-type Pet struct {
+type PetModel struct {
+	Id        int
 	Name      string
 	PetType   string
 	Birthdate time.Time
-}
-
-type PetType struct {
-	Name string
 }

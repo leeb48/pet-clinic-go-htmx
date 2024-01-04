@@ -11,5 +11,9 @@ func (app *application) routes() *httprouter.Router {
 	router.GET("/owner/create", app.ownerCreate)
 	router.POST("/owner/create", app.ownerCreatePost)
 
+	router.POST("/pet/add-pet-type", app.newPetTypePost)
+
+	router.GET("/admin", app.adminPage)
+
 	return router
 }

@@ -6,6 +6,7 @@ import (
 )
 
 type Owner struct {
+	Id        int
 	FirstName string
 	LastName  string
 	Address   string

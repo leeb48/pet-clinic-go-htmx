@@ -2,9 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/julienschmidt/httprouter"
+	"pet-clinic.bonglee.com/internal/models/customErrors"
 	"pet-clinic.bonglee.com/internal/validator"
 )
 
@@ -85,4 +88,51 @@ func (app *application) ownerCreatePost(w http.ResponseWriter, r *http.Request, 
 	// }
 
 	// fmt.Printf("Owner: %v\nPets: %v", owner, pets)
+}
+
+type newPetTypeForm struct {
+	NewPetType          string `json:"newPetType"`
+	validator.Validator `form:"-"`
+}
+
+func (app *application) adminPage(w http.ResponseWriter, r *http.Request, pr httprouter.Params) {
+	data := templateData{}
+	data.Form = newPetTypeForm{}
+	app.render(w, r, http.StatusOK, "admin.html", data)
+}
+
+func (app *application) newPetTypePost(w http.ResponseWriter, r *http.Request, pr httprouter.Params) {
+	var form newPetTypeForm
+	err := json.NewDecoder(r.Body).Decode(&form)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	form.NewPetType = strings.ToUpper(form.NewPetType)
+
+	form.CheckField(validator.NotBlank(form.NewPetType), "newPetType", "Pet type cannot be blank")
+
+	if !form.Valid() {
+		data := templateData{Form: form}
+		app.render(w, r, http.StatusUnprocessableEntity, "admin.html", data)
+		return
+	}
+
+	err = app.petTypes.Insert(form.NewPetType)
+	if err != nil {
+
+		app.logger.Error(err.Error())
+
+		if errors.Is(err, customErrors.ErrDuplicatePetType) {
+			form.AddFieldError("newPetType", "Duplicate pet type")
+			data := templateData{Form: form}
+			app.render(w, r, http.StatusUnprocessableEntity, "admin.html", data)
+		} else {
+			app.serverError(w, r, err)
+		}
+		return
+	}
+
+	http.Redirect(w, r, "/admin", http.StatusSeeOther)
 }
