@@ -3,20 +3,17 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"regexp"
-	"strings"
 	"testing"
 
 	"pet-clinic.bonglee.com/internal/models/mocks"
 )
 
-// todo: see if there is a way to extract the error message from the template
-var errorHtmlRX = regexp.MustCompile(`<div class="form-text text-danger">(.*)`)
+var getFormTextHTML = regexp.MustCompile(`<div class="form-text text-danger">(.*) `)
 
 func TestNewPetTypePost(t *testing.T) {
 
@@ -38,32 +35,32 @@ func TestNewPetTypePost(t *testing.T) {
 	}
 
 	tests := []struct {
-		name        string
-		petType     string
-		urlPath     string
-		wantCode    int
-		wantFormTag string
+		name     string
+		petType  string
+		urlPath  string
+		wantCode int
+		errMsg   string
 	}{
-		// {
-		// 	name:        "Valid pet type",
-		// 	petType:     "Cat",
-		// 	urlPath:     "/pet/add-pet-type",
-		// 	wantCode:    http.StatusSeeOther,
-		// 	wantFormTag: "",
-		// },
-		// {
-		// 	name:        "Duplicate pet type",
-		// 	petType:     "Dog",
-		// 	urlPath:     "/pet/add-pet-type",
-		// 	wantCode:    http.StatusUnprocessableEntity,
-		// 	wantFormTag: `<form hx-post="/pet/add-pet-type" hx-ext='json-enc' novalidate>`,
-		// },
 		{
-			name:        "Empty pet type",
-			petType:     "",
-			urlPath:     "/pet/add-pet-type",
-			wantCode:    http.StatusUnprocessableEntity,
-			wantFormTag: `<form hx-post="/pet/add-pet-type" hx-ext='json-enc' novalidate>`,
+			name:     "Valid pet type",
+			petType:  "Cat",
+			urlPath:  "/pet/add-pet-type",
+			wantCode: http.StatusSeeOther,
+			errMsg:   "",
+		},
+		{
+			name:     "Duplicate pet type",
+			petType:  "Dog",
+			urlPath:  "/pet/add-pet-type",
+			wantCode: http.StatusUnprocessableEntity,
+			errMsg:   "Duplicate pet type",
+		},
+		{
+			name:     "Empty pet type",
+			petType:  "",
+			urlPath:  "/pet/add-pet-type",
+			wantCode: http.StatusUnprocessableEntity,
+			errMsg:   "Pet type cannot be blank",
 		},
 	}
 
@@ -81,18 +78,14 @@ func TestNewPetTypePost(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			matches := errorHtmlRX.FindStringSubmatch(string(body))
+			matches := getFormTextHTML.FindStringSubmatch(string(body))
 
-			for _, match := range matches {
-				fmt.Println(match)
+			if len(matches) > 1 && matches[1] != test.errMsg {
+				t.Errorf("got: %s; want %s", matches[1], test.errMsg)
 			}
 
 			if rs.StatusCode != test.wantCode {
 				t.Errorf("got: %v; want: %v", rs.StatusCode, test.wantCode)
-			}
-
-			if !strings.Contains(string(body), test.wantFormTag) {
-				t.Errorf("got: %q; expected to contain: %q", string(body), test.wantFormTag)
 			}
 		})
 	}
