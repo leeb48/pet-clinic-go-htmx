@@ -16,6 +16,7 @@ type PetType struct {
 
 type PetTypeModelInterface interface {
 	Insert(petType string) error
+	GetAll() ([]string, error)
 }
 
 type PetTypeModel struct {
@@ -40,4 +41,30 @@ func (model *PetTypeModel) Insert(petType string) error {
 	}
 
 	return nil
+}
+
+func (model *PetTypeModel) GetAll() ([]string, error) {
+	stmt := `
+		SELECT name
+		FROM petTypes
+	`
+
+	rows, err := model.DB.Query(stmt)
+	if err != nil {
+		return nil, err
+	}
+
+	petTypes := []string{}
+
+	for rows.Next() {
+		var petType string
+		err = rows.Scan(&petType)
+		if err != nil {
+			return nil, err
+		}
+
+		petTypes = append(petTypes, petType)
+	}
+
+	return petTypes, nil
 }

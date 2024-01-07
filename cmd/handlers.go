@@ -3,10 +3,13 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
+	"pet-clinic.bonglee.com/internal/models"
 	"pet-clinic.bonglee.com/internal/models/customErrors"
 	"pet-clinic.bonglee.com/internal/validator"
 )
@@ -33,12 +36,23 @@ type newOwnerForm struct {
 	PetName             []string `json:"petName"`
 	PetType             []string `json:"petType"`
 	PetBirthdate        []string `json:"petBirthdate"`
+	ValidPetTypes       []string
 	validator.Validator `form:"-"`
 }
 
 func (app *application) ownerCreate(w http.ResponseWriter, r *http.Request, pr httprouter.Params) {
+
+	petTypes, err := app.petTypes.GetAll()
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
 	data := templateData{}
-	data.Form = newOwnerForm{}
+	data.Form = newOwnerForm{
+		ValidPetTypes: petTypes,
+	}
+
 	app.render(w, r, http.StatusOK, "owner-create.html", data)
 }
 
@@ -70,24 +84,28 @@ func (app *application) ownerCreatePost(w http.ResponseWriter, r *http.Request, 
 
 	app.owners.Insert(form.FirstName, form.LastName, form.Address, form.State, form.City, form.Phone, form.Email, form.Birthdate)
 
-	// pets := []models.Pet{}
+	pets := []models.PetModel{}
 
-	// for i := 0; i < len(newOwner.PetName); i++ {
+	for i := 0; i < len(form.PetName); i++ {
 
-	// 	birthdate, err := time.Parse("01/02/2006", newOwner.PetBirthdate[i])
-	// 	if err != nil {
-	// 		app.serverError(w, r, err)
-	// 		return
-	// 	}
+		if form.PetName[i] == "" || form.PetType[i] == "" || form.PetBirthdate[i] == "" {
+			continue
+		}
 
-	// 	pets = append(pets, models.Pet{
-	// 		Name:      newOwner.PetName[i],
-	// 		PetType:   newOwner.PetType[i],
-	// 		Birthdate: birthdate,
-	// 	})
-	// }
+		birthdate, err := time.Parse("2006-01-02", (form.PetBirthdate[i]))
+		if err != nil {
+			app.serverError(w, r, err)
+			return
+		}
 
-	// fmt.Printf("Owner: %v\nPets: %v", owner, pets)
+		pets = append(pets, models.PetModel{
+			Name:      form.PetName[i],
+			PetType:   form.PetType[i],
+			Birthdate: birthdate,
+		})
+	}
+
+	fmt.Printf("Owner: %v\nPets: %v", form, pets)
 }
 
 type newPetTypeForm struct {

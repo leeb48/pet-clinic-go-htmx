@@ -5,8 +5,8 @@ Admin Page
 {{define "main"}}
 <div class="container mt-2">
     <div class="row">
-        <div class="col" hx-ext="json-enc, response-targets">
-            <form hx-post="/pet/add-pet-type" novalidate hx-target-4*="body">
+        <div class="col">
+            <form hx-post="/pet/add-pet-type" novalidate hx-target="body" hx-target-4*="body">
                 <div class="form-text text-danger">{{with .Form.FieldErrors.newPetType}}{{.}}{{end}} &nbsp;</div>
                 <div class="mb-3 w-25">
                     <div class="input-group">

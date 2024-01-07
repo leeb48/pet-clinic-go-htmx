@@ -41,3 +41,8 @@ ADD
     ownerId INTEGER,
 ADD
     CONSTRAINT FK_pets_owner_ownerId Foreign KEY (ownerId) REFERENCES owners(id);
+
+INSERT INTO
+    petTypes (name)
+VALUES
+    ('DOG');
