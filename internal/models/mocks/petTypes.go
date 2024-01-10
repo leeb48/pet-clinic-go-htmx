@@ -21,3 +21,12 @@ func (model *PetTypeModel) Insert(petType string) error {
 		return nil
 	}
 }
+
+func (model *PetTypeModel) GetAll() ([]string, error) {
+
+	return []string{}, nil
+}
+
+func (model *PetTypeModel) GetIdFromPetType(string) (int, error) {
+	return 0, nil
+}

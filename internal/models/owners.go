@@ -19,23 +19,28 @@ type Owner struct {
 }
 
 type OwnerModelInterface interface {
-	Insert(firstName, lastName, addr, state, city, phone, email, birthdate string) error
+	Insert(firstName, lastName, addr, state, city, phone, email, birthdate string) (int, error)
 }
 
 type OwnerModel struct {
 	DB *sql.DB
 }
 
-func (model *OwnerModel) Insert(firstName, lastName, addr, state, city, phone, email, birthdate string) error {
+func (model *OwnerModel) Insert(firstName, lastName, addr, state, city, phone, email, birthdate string) (int, error) {
 	stmt := `
 		INSERT INTO owners (firstName, lastName, address, state, city, phone, email, birthdate, created)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, UTC_TIMESTAMP())
 	`
 
-	_, err := model.DB.Exec(stmt, firstName, lastName, addr, state, city, phone, email, birthdate)
+	result, err := model.DB.Exec(stmt, firstName, lastName, addr, state, city, phone, email, birthdate)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	return nil
+	ownerId, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(ownerId), nil
 }

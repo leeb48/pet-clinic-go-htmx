@@ -5,10 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/julienschmidt/httprouter"
+	"pet-clinic.bonglee.com/internal/common"
 	"pet-clinic.bonglee.com/internal/models"
 	"pet-clinic.bonglee.com/internal/models/customErrors"
 	"pet-clinic.bonglee.com/internal/validator"
@@ -56,8 +58,10 @@ func (app *application) ownerCreate(w http.ResponseWriter, r *http.Request, pr h
 	app.render(w, r, http.StatusOK, "owner-create.html", data)
 }
 
+// todo refactor to make it cleaner
 func (app *application) ownerCreatePost(w http.ResponseWriter, r *http.Request, pr httprouter.Params) {
 	var form newOwnerForm
+
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
 		app.logger.Error(err.Error())
@@ -82,9 +86,14 @@ func (app *application) ownerCreatePost(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	app.owners.Insert(form.FirstName, form.LastName, form.Address, form.State, form.City, form.Phone, form.Email, form.Birthdate)
+	ownerId, err := app.owners.Insert(form.FirstName, form.LastName, form.Address, form.State, form.City, form.Phone, form.Email, form.Birthdate)
+	if err != nil {
+		app.logger.Error(err.Error())
+		// todo: need to show error message when redirecting
+		http.Redirect(w, r, "/owner/create", http.StatusUnprocessableEntity)
+	}
 
-	pets := []models.PetModel{}
+	pets := []models.Pet{}
 
 	for i := 0; i < len(form.PetName); i++ {
 
@@ -98,14 +107,30 @@ func (app *application) ownerCreatePost(w http.ResponseWriter, r *http.Request, 
 			return
 		}
 
-		pets = append(pets, models.PetModel{
+		petTypeId, err := app.petTypes.GetIdFromPetType(form.PetType[i])
+		if defaultPetType, _ := strconv.Atoi(app.env[common.DEFAULT_PET_TYPE]); petTypeId == 0 && err == nil {
+			app.logger.Error(err.Error())
+			petTypeId = defaultPetType
+		}
+
+		pets = append(pets, models.Pet{
 			Name:      form.PetName[i],
-			PetType:   form.PetType[i],
 			Birthdate: birthdate,
+			PetTypeId: petTypeId,
+			OwnerId:   ownerId,
 		})
 	}
 
-	fmt.Printf("Owner: %v\nPets: %v", form, pets)
+	fmt.Printf("Owner: %v\nPets: %#v", form, pets)
+
+	for _, pet := range pets {
+		err := app.pets.Insert(pet.Name, pet.Birthdate, pet.PetTypeId, pet.OwnerId)
+		if err != nil {
+			app.logger.Error(err.Error())
+		}
+	}
+
+	http.Redirect(w, r, "/owner/create", http.StatusSeeOther)
 }
 
 type newPetTypeForm struct {

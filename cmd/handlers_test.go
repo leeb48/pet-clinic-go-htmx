@@ -17,6 +17,7 @@ var getFormTextHTML = regexp.MustCompile(`<div class="form-text text-danger">(.*
 
 func TestNewPetTypePost(t *testing.T) {
 
+	// todo: extract out app & server initialization logic to a helper function
 	templateCache, err := createTemplateCache()
 	if err != nil {
 		t.Fatal(err)

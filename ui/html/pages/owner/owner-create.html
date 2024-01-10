@@ -5,8 +5,7 @@ Owner Create
 {{define "main"}}
 <h1>Owner Create Form</h1>
 
-<!-- <form hx-post='/owner/create' novalidate hx-target="body" hx-target-4*="body"> -->
-<form hx-post='/owner/create' novalidate hx-target="body" hx-target-4*="body" hx-swap="none">
+<form hx-post='/owner/create' novalidate hx-target="body" hx-target-4*="body">
     <div class="row mb-3">
         <div class="col">
             <label for="firstName" class="form-label">First name</label>
@@ -170,10 +169,16 @@ Owner Create
 
 
 <script>
+    document.addEventListener('htmx:configRequest', (event) => {
+        params = event.detail.parameters
+        if (params['petName'] === '') params['petName'] = []
+        if (params['petType'] === '') params['petType'] = []
+        if (params['petBirthdate'] === '') params['petBirthdate'] = []
+    })
     document.getElementById('add-pet-btn').onclick = (e) => {
         e.preventDefault();
         const petName = document.getElementById('pet-name-input').value || 'Mango';
-        const petType = document.getElementById('pet-type-input').value || 'Dog';
+        const petType = document.getElementById('pet-type-input').value || 'DOG';
         const petBirthdate = document.getElementById('pet-birthdate-input').value || '2017-05-05';
 
         if (!petName || !petType || !petBirthdate) return;
