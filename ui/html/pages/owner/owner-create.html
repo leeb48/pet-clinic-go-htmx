@@ -5,7 +5,7 @@ Owner Create
 {{define "main"}}
 <h1>Owner Create Form</h1>
 
-<form hx-post='/owner/create' hx-ext='json-enc' hx-target="body" novalidate>
+<form hx-post='/owner/create' novalidate hx-target="body" hx-target-4*="body">
     <div class="row mb-3">
         <div class="col">
             <label for="firstName" class="form-label">First name</label>
@@ -143,13 +143,18 @@ Owner Create
         <tbody>
             <tr>
                 <th scope="row">
-                    <input type="text" class="form-control" id="pet-name-input" placeholder="Pet Name">
+                    <input type="text" class="form-control" id="pet-name-input" name="petName" placeholder="Pet Name">
                 </th>
                 <td>
-                    <input type="text" class="form-control" id="pet-type-input" placeholder="Pet Type">
+                    <select class="form-select" id="pet-type-input" name="petType" required>
+                        <option value="" selected="selected">Select pet type</option>
+                        {{ range .Form.ValidPetTypes}}
+                        <option value="{{.}}">{{.}}</option>
+                        {{ end }}
+                    </select>
                 </td>
                 <td>
-                    <input type="date" class="form-control" id="pet-birthdate-input">
+                    <input type="date" class="form-control" id="pet-birthdate-input" name="petBirthdate">
                 </td>
                 <td>
                     <button id="add-pet-btn" class="btn btn-outline-success">Add</button>
@@ -162,15 +167,19 @@ Owner Create
 </form>
 
 
+
 <script>
-
-    let count = 0;
-
+    document.addEventListener('htmx:configRequest', (event) => {
+        params = event.detail.parameters
+        if (params['petName'] === '') params['petName'] = []
+        if (params['petType'] === '') params['petType'] = []
+        if (params['petBirthdate'] === '') params['petBirthdate'] = []
+    })
     document.getElementById('add-pet-btn').onclick = (e) => {
         e.preventDefault();
         const petName = document.getElementById('pet-name-input').value || 'Mango';
-        const petType = document.getElementById('pet-type-input').value || 'Dog';
-        const petBirthdate = document.getElementById('pet-birthdate-input').value || '04/05/2023';
+        const petType = document.getElementById('pet-type-input').value || 'DOG';
+        const petBirthdate = document.getElementById('pet-birthdate-input').value || '2017-05-05';
 
         if (!petName || !petType || !petBirthdate) return;
 
@@ -184,18 +193,12 @@ Owner Create
         nameCell.innerHTML = `<input class="form-control-plaintext" type="text" name="petName" value=${petName} readonly>`
         petTypeCell.innerHTML = `<input class="form-control-plaintext" type="text" name="petType" value=${petType} readonly>`
         petBirthdateCell.innerHTML = `<input class="form-control-plaintext" type="text" name="petBirthdate" value=${petBirthdate} readonly>`
-        remove.innerHTML = `<button class="btn btn-outline-danger">X</button>`
-        count++
+        remove.innerHTML = `<button type="button" class="btn btn-outline-danger" onclick="deleteRow(this)">X</button>`
     }
 
-    document.querySelector('form').addEventListener('htmx:responseError', function (event) {
-        if (event.detail?.xhr?.response) {
-            const alertElement = document.createElement('div')
-            alertElement.id = 'error-alert'
-            alertElement.className = 'alert alert-danger';
-            alertElement.innerText = 'Server Error'
-            document.getElementById('error-alert').replaceWith(alertElement)
-        }
-    });
+    function deleteRow(row) {
+        row.parentNode.parentNode.remove()
+    }
+
 </script>
 {{end}}

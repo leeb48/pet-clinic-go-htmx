@@ -1,0 +1,23 @@
+{{define "title"}}
+Admin Page
+{{end}}
+
+{{define "main"}}
+<div class="container mt-2">
+    <div class="row">
+        <div class="col">
+            <form hx-post="/pet/add-pet-type" novalidate hx-target="body" hx-target-4*="body">
+                <div class="form-text text-danger">{{with .Form.FieldErrors.newPetType}}{{.}}{{end}} &nbsp;</div>
+                <div class="mb-3 w-25">
+                    <div class="input-group">
+                        <span class="input-group-text" id="basic-addon3">Pet Type</span>
+                        <input type="text" style="text-transform: uppercase;" class="form-control" id="new-pet-type"
+                            name="newPetType" value="{{.Form.NewPetType}}" aria-describedby="basic-addon3 basic-addon4">
+                    </div>
+                </div>
+                <button class="btn btn-outline-success" type="submit">Create</button>
+            </form>
+        </div>
+    </div>
+</div>
+{{end}}

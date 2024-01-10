@@ -11,13 +11,17 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/joho/godotenv"
 	"pet-clinic.bonglee.com/internal/models"
 )
 
 type application struct {
 	logger        *slog.Logger
 	templateCache map[string]*template.Template
+	env           map[string]string
 	owners        models.OwnerModelInterface
+	petTypes      models.PetTypeModelInterface
+	pets          models.PetModelInterface
 }
 
 type config struct {
@@ -49,10 +53,19 @@ func main() {
 		os.Exit(1)
 	}
 
+	env, err := godotenv.Read()
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+
 	app := application{
 		logger:        logger,
 		templateCache: templateCache,
+		env:           env,
 		owners:        &models.OwnerModel{DB: db},
+		petTypes:      &models.PetTypeModel{DB: db},
+		pets:          &models.PetModel{DB: db},
 	}
 
 	server := http.Server{
