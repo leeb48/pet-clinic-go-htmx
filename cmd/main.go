@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"flag"
 	"html/template"
 	"log"
 	"log/slog"
@@ -10,6 +9,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/alexedwards/scs/v2"
+	"github.com/caarlos0/env"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
 	"pet-clinic.bonglee.com/internal/models"
@@ -18,29 +19,40 @@ import (
 type application struct {
 	logger        *slog.Logger
 	templateCache map[string]*template.Template
-	env           map[string]string
+	cfg           config
+	session       *scs.SessionManager
 	owners        models.OwnerModelInterface
 	petTypes      models.PetTypeModelInterface
 	pets          models.PetModelInterface
 }
 
 type config struct {
-	addr string
-	dsn  string
+	Addr            string `env:"ADDR"`
+	DSN             string `env:"DSN"`
+	SessionDuration int    `env:"SESSION_DURATION"`
+	DefaultPetType  int    `env:"DEFAULT_PET_TYPE"`
 }
 
 func main() {
-
-	var cfg config
-	flag.StringVar(&cfg.addr, "addr", ":7771", "HTTP network address")
-	flag.StringVar(&cfg.dsn, "dsn", "app:1234@/petClinic?parseTime=true&multiStatements=true", "MySQL data source name")
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 		AddSource: true,
 		Level:     slog.LevelDebug,
 	}))
 
-	db, err := openDB(cfg.dsn)
+	err := godotenv.Load()
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+
+	cfg := config{}
+	if err := env.Parse(&cfg); err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+
+	db, err := openDB(cfg.DSN)
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
@@ -53,23 +65,21 @@ func main() {
 		os.Exit(1)
 	}
 
-	env, err := godotenv.Read()
-	if err != nil {
-		logger.Error(err.Error())
-		os.Exit(1)
-	}
+	session := scs.New()
+	session.Lifetime = time.Duration(cfg.SessionDuration) * time.Hour
 
 	app := application{
 		logger:        logger,
 		templateCache: templateCache,
-		env:           env,
+		cfg:           cfg,
+		session:       session,
 		owners:        &models.OwnerModel{DB: db},
 		petTypes:      &models.PetTypeModel{DB: db},
 		pets:          &models.PetModel{DB: db},
 	}
 
 	server := http.Server{
-		Addr:         cfg.addr,
+		Addr:         cfg.Addr,
 		Handler:      app.routes(),
 		ErrorLog:     slog.NewLogLogger(logger.Handler(), slog.LevelError),
 		IdleTimeout:  time.Minute,

@@ -3,25 +3,22 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/julienschmidt/httprouter"
-	"pet-clinic.bonglee.com/internal/common"
 	"pet-clinic.bonglee.com/internal/models"
 	"pet-clinic.bonglee.com/internal/models/customErrors"
 	"pet-clinic.bonglee.com/internal/validator"
 )
 
-func (app *application) home(w http.ResponseWriter, r *http.Request, pr httprouter.Params) {
+func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	data := templateData{}
 	app.render(w, r, http.StatusOK, "home.html", data)
 }
 
-func (app *application) ownerList(w http.ResponseWriter, r *http.Request, pr httprouter.Params) {
+func (app *application) ownerList(w http.ResponseWriter, r *http.Request) {
 	data := templateData{}
 	app.render(w, r, http.StatusOK, "owner-list.html", data)
 }
@@ -42,7 +39,7 @@ type newOwnerForm struct {
 	validator.Validator `form:"-"`
 }
 
-func (app *application) ownerCreate(w http.ResponseWriter, r *http.Request, pr httprouter.Params) {
+func (app *application) ownerCreate(w http.ResponseWriter, r *http.Request) {
 
 	petTypes, err := app.petTypes.GetAll()
 	if err != nil {
@@ -50,7 +47,7 @@ func (app *application) ownerCreate(w http.ResponseWriter, r *http.Request, pr h
 		return
 	}
 
-	data := templateData{}
+	data := app.newTemplateData(r)
 	data.Form = newOwnerForm{
 		ValidPetTypes: petTypes,
 	}
@@ -59,7 +56,7 @@ func (app *application) ownerCreate(w http.ResponseWriter, r *http.Request, pr h
 }
 
 // todo refactor to make it cleaner
-func (app *application) ownerCreatePost(w http.ResponseWriter, r *http.Request, pr httprouter.Params) {
+func (app *application) ownerCreatePost(w http.ResponseWriter, r *http.Request) {
 	var form newOwnerForm
 
 	err := json.NewDecoder(r.Body).Decode(&form)
@@ -80,7 +77,7 @@ func (app *application) ownerCreatePost(w http.ResponseWriter, r *http.Request, 
 
 	if !form.Validator.Valid() {
 
-		data := templateData{}
+		data := app.newTemplateData(r)
 		data.Form = form
 		app.render(w, r, http.StatusUnprocessableEntity, "owner-create.html", data)
 		return
@@ -88,9 +85,14 @@ func (app *application) ownerCreatePost(w http.ResponseWriter, r *http.Request, 
 
 	ownerId, err := app.owners.Insert(form.FirstName, form.LastName, form.Address, form.State, form.City, form.Phone, form.Email, form.Birthdate)
 	if err != nil {
+
 		app.logger.Error(err.Error())
-		// todo: need to show error message when redirecting
-		http.Redirect(w, r, "/owner/create", http.StatusUnprocessableEntity)
+		app.session.Put(r.Context(), FLASH_MSG, "Error occured during owner creation")
+
+		data := app.newTemplateData(r)
+		data.Form = form
+		app.render(w, r, http.StatusUnprocessableEntity, "owner-create.html", data)
+		return
 	}
 
 	pets := []models.Pet{}
@@ -108,9 +110,9 @@ func (app *application) ownerCreatePost(w http.ResponseWriter, r *http.Request, 
 		}
 
 		petTypeId, err := app.petTypes.GetIdFromPetType(form.PetType[i])
-		if defaultPetType, _ := strconv.Atoi(app.env[common.DEFAULT_PET_TYPE]); petTypeId == 0 && err == nil {
+		if err != nil {
 			app.logger.Error(err.Error())
-			petTypeId = defaultPetType
+			petTypeId = app.cfg.DefaultPetType
 		}
 
 		pets = append(pets, models.Pet{
@@ -120,8 +122,6 @@ func (app *application) ownerCreatePost(w http.ResponseWriter, r *http.Request, 
 			OwnerId:   ownerId,
 		})
 	}
-
-	fmt.Printf("Owner: %v\nPets: %#v", form, pets)
 
 	for _, pet := range pets {
 		err := app.pets.Insert(pet.Name, pet.Birthdate, pet.PetTypeId, pet.OwnerId)
@@ -139,12 +139,12 @@ type newPetTypeForm struct {
 }
 
 func (app *application) adminPage(w http.ResponseWriter, r *http.Request, pr httprouter.Params) {
-	data := templateData{}
+	data := app.newTemplateData(r)
 	data.Form = newPetTypeForm{}
 	app.render(w, r, http.StatusOK, "admin.html", data)
 }
 
-func (app *application) newPetTypePost(w http.ResponseWriter, r *http.Request, pr httprouter.Params) {
+func (app *application) newPetTypePost(w http.ResponseWriter, r *http.Request) {
 	var form newPetTypeForm
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
@@ -157,7 +157,8 @@ func (app *application) newPetTypePost(w http.ResponseWriter, r *http.Request, p
 	form.CheckField(validator.NotBlank(form.NewPetType), "newPetType", "Pet type cannot be blank")
 
 	if !form.Valid() {
-		data := templateData{Form: form}
+		data := app.newTemplateData(r)
+		data.Form = form
 		app.render(w, r, http.StatusUnprocessableEntity, "admin.html", data)
 		return
 	}
@@ -169,7 +170,8 @@ func (app *application) newPetTypePost(w http.ResponseWriter, r *http.Request, p
 
 		if errors.Is(err, customErrors.ErrDuplicatePetType) {
 			form.AddFieldError("newPetType", "Duplicate pet type")
-			data := templateData{Form: form}
+			data := app.newTemplateData(r)
+			data.Form = form
 			app.render(w, r, http.StatusUnprocessableEntity, "admin.html", data)
 		} else {
 			app.serverError(w, r, err)
