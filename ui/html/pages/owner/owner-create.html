@@ -5,6 +5,12 @@ Owner Create
 {{define "main"}}
 <h1>Owner Create Form</h1>
 
+{{with .FlashMsg}}
+<div class="alert alert-danger" role="alert">
+    {{.}}
+</div>
+{{end}}
+
 <form hx-post='/owner/create' novalidate hx-target="body" hx-target-4*="body">
     <div class="row mb-3">
         <div class="col">

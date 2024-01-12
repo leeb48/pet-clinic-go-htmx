@@ -3,13 +3,23 @@ package main
 import (
 	"html/template"
 	"io/fs"
+	"net/http"
 	"path/filepath"
 
 	"pet-clinic.bonglee.com/ui"
 )
 
 type templateData struct {
-	Form any
+	FlashMsg string
+	Form     any
+}
+
+const FLASH_MSG = "flash"
+
+func (app *application) newTemplateData(r *http.Request) templateData {
+	return templateData{
+		FlashMsg: app.session.PopString(r.Context(), FLASH_MSG),
+	}
 }
 
 func createTemplateCache() (map[string]*template.Template, error) {
