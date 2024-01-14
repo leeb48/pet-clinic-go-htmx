@@ -25,8 +25,10 @@ func newTestApp(t *testing.T) *application {
 	app := &application{
 		logger:        slog.New(slog.NewTextHandler(io.Discard, nil)),
 		templateCache: templateCache,
-		petTypes:      &mocks.PetTypeModel{},
 		session:       session,
+		owners:        &mocks.OwnerModel{},
+		petTypes:      &mocks.PetTypeModel{},
+		pets:          &mocks.PetModel{},
 	}
 
 	return app

@@ -72,3 +72,25 @@ func TestNewPetTypePost(t *testing.T) {
 		})
 	}
 }
+
+func TestOwnerCreatePost(t *testing.T) {
+	// app := newTestApp(t)
+	// testServer := newTestServer(t, app.routes())
+
+	// tests := []struct {
+	// 	name  string
+	// 	owner models.Owner
+	// 	urlPath string
+	// 	wantCode int
+	// 	alertMsg string
+	// 	formTag string
+	// } {
+	// 	{
+	// 		name: "Valid new owner request",
+	// 		owner: models.Owner{
+	// 			fi
+	// 		},
+	// 	}
+	// }
+
+}
