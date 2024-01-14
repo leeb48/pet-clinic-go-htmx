@@ -87,10 +87,11 @@ func (app *application) ownerCreatePost(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 
 		app.logger.Error(err.Error())
-		app.session.Put(r.Context(), FLASH_MSG, "Error occured during owner creation")
 
 		data := app.newTemplateData(r)
 		data.Form = form
+		data.Alert = Alert{Msg: "Owner creation error", MsgType: DANGER}
+
 		app.render(w, r, http.StatusUnprocessableEntity, "owner-create.html", data)
 		return
 	}
@@ -129,6 +130,8 @@ func (app *application) ownerCreatePost(w http.ResponseWriter, r *http.Request) 
 			app.logger.Error(err.Error())
 		}
 	}
+
+	app.session.Put(r.Context(), FLASH_MSG, "User created")
 
 	http.Redirect(w, r, "/owner/create", http.StatusSeeOther)
 }

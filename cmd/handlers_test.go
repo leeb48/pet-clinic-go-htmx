@@ -4,36 +4,17 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"log/slog"
 	"net/http"
-	"net/http/httptest"
 	"regexp"
 	"testing"
-
-	"pet-clinic.bonglee.com/internal/models/mocks"
 )
 
-var getFormTextHTML = regexp.MustCompile(`<div class="form-text text-danger">(.*) `)
+var getFormTextDangerHtml = regexp.MustCompile(`<div class="form-text text-danger">(.*) `)
 
 func TestNewPetTypePost(t *testing.T) {
 
-	// todo: extract out app & server initialization logic to a helper function
-	templateCache, err := createTemplateCache()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	app := &application{
-		logger:        slog.New(slog.NewTextHandler(io.Discard, nil)),
-		templateCache: templateCache,
-		petTypes:      &mocks.PetTypeModel{},
-	}
-
-	testServer := httptest.NewTLSServer(app.routes())
-
-	testServer.Client().CheckRedirect = func(req *http.Request, via []*http.Request) error {
-		return http.ErrUseLastResponse
-	}
+	app := newTestApp(t)
+	testServer := newTestServer(t, app.routes())
 
 	tests := []struct {
 		name     string
@@ -79,7 +60,7 @@ func TestNewPetTypePost(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			matches := getFormTextHTML.FindStringSubmatch(string(body))
+			matches := getFormTextDangerHtml.FindStringSubmatch(string(body))
 
 			if len(matches) > 1 && matches[1] != test.errMsg {
 				t.Errorf("got: %s; want %s", matches[1], test.errMsg)

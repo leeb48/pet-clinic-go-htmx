@@ -9,12 +9,24 @@ import (
 	"pet-clinic.bonglee.com/ui"
 )
 
+type Alert struct {
+	Msg     string
+	MsgType string
+}
 type templateData struct {
+	Alert    Alert
 	FlashMsg string
 	Form     any
 }
 
-const FLASH_MSG = "flash"
+const (
+	FLASH_MSG = "FLASH_MSG"
+	PRIMARY   = "primary"
+	DANGER    = "danger"
+	SUCCESS   = "success"
+	WARNING   = "warning"
+	INFO      = "info"
+)
 
 func (app *application) newTemplateData(r *http.Request) templateData {
 	return templateData{

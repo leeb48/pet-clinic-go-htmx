@@ -3,13 +3,14 @@ Owner Create
 {{end}}
 
 {{define "main"}}
-<h1>Owner Create Form</h1>
 
-{{with .FlashMsg}}
-<div class="alert alert-danger" role="alert">
-    {{.}}
+{{if .Alert.Msg}}
+<div class="alert alert-{{.Alert.MsgType}}" role="alert">
+    {{.Alert.Msg}}
 </div>
 {{end}}
+
+<h1>Owner Create Form</h1>
 
 <form hx-post='/owner/create' novalidate hx-target="body" hx-target-4*="body">
     <div class="row mb-3">
