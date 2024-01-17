@@ -2,7 +2,12 @@ package models
 
 import (
 	"database/sql"
+	"errors"
+	"fmt"
 	"time"
+
+	"github.com/go-sql-driver/mysql"
+	"pet-clinic.bonglee.com/internal/models/customErrors"
 )
 
 type Pet struct {
@@ -30,6 +35,14 @@ func (model *PetModel) Insert(name string, birthdate time.Time, petTypeId, owner
 
 	_, err := model.DB.Exec(stmt, name, birthdate, petTypeId, ownerId)
 	if err != nil {
+		var mySqlError *mysql.MySQLError
+		if errors.As(err, &mySqlError) {
+			fmt.Println(mySqlError.Number)
+			if mySqlError.Number == customErrors.MY_SQL_CONSTRAINT_CODE {
+				return customErrors.CheckConstraintError
+			}
+		}
+		fmt.Println(err)
 		return err
 	}
 
