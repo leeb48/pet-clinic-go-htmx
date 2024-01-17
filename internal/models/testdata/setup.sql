@@ -1,26 +1,26 @@
 CREATE TABLE owners (
     id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    firstName VARCHAR(255) NOT NULL,
-    lastName VARCHAR(255) NOT NULL,
-    address VARCHAR(255) NOT NULL,
-    state VARCHAR(255) NOT NULL,
-    city VARCHAR(255) NOT NULL,
-    phone VARCHAR(10) NOT NULL,
-    email VARCHAR(255) NOT NULL,
+    firstName VARCHAR(255) NOT NULL CHECK (firstName <> ''),
+    lastName VARCHAR(255) NOT NULL CHECK (lastName <> ''),
+    address VARCHAR(255) NOT NULL CHECK (address <> ''),
+    state VARCHAR(255) NOT NULL CHECK (state <> ''),
+    city VARCHAR(255) NOT NULL CHECK (city <> ''),
+    phone VARCHAR(10) NOT NULL CHECK (phone <> ''),
+    email VARCHAR(255) NOT NULL CHECK (email <> ''),
     birthdate DATE NOT NULL,
     created DATETIME NOT NULL
 );
 
 CREATE TABLE pets (
     id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL,
+    name VARCHAR(255) NOT NULL CHECK (name <> ''),
     birthdate DATE NOT NULL,
     created DATETIME NOT NULL
 );
 
 CREATE TABLE petTypes (
     id INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255) NOT NULL
+    name VARCHAR(255) NOT NULL CHECK (name <> '')
 );
 
 ALTER TABLE

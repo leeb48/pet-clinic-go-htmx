@@ -37,6 +37,10 @@ func (model *PetTypeModel) Insert(petType string) error {
 			if mySqlError.Number == customErrors.MY_SQL_DUPLICATE_CODE && strings.Contains(mySqlError.Message, customErrors.DUPLICATE_PET_TYPE_KEY) {
 				return customErrors.ErrDuplicatePetType
 			}
+
+			if mySqlError.Number == customErrors.MY_SQL_CONSTRAINT_CODE {
+				return customErrors.CheckConstraintError
+			}
 		}
 		return err
 	}
