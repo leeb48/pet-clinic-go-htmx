@@ -87,7 +87,10 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
+	app.logger.Info("starting server", slog.String("addr", app.cfg.Addr))
+
 	err = server.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
+
 	if err != nil {
 		log.Fatal(err)
 	}

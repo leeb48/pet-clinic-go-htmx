@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/julienschmidt/httprouter"
 	"pet-clinic.bonglee.com/internal/models"
 	"pet-clinic.bonglee.com/internal/models/customErrors"
 	"pet-clinic.bonglee.com/internal/validator"
@@ -141,7 +140,7 @@ type newPetTypeForm struct {
 	validator.Validator `form:"-"`
 }
 
-func (app *application) adminPage(w http.ResponseWriter, r *http.Request, pr httprouter.Params) {
+func (app *application) adminPage(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
 	data.Form = newPetTypeForm{}
 	app.render(w, r, http.StatusOK, "admin.html", data)

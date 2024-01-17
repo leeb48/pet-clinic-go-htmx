@@ -21,7 +21,7 @@ func (app *application) routes() *httprouter.Router {
 
 	router.Handler(http.MethodPost, "/pet/add-pet-type", dynamic.ThenFunc(app.newPetTypePost))
 
-	router.GET("/admin", app.adminPage)
+	router.Handler(http.MethodGet, "/admin", dynamic.ThenFunc(app.adminPage))
 
 	return router
 }
