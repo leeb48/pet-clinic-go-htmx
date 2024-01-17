@@ -43,6 +43,31 @@ ADD
     CONSTRAINT FK_pets_owner_ownerId Foreign KEY (ownerId) REFERENCES owners(id);
 
 INSERT INTO
+    owners (
+        firstName,
+        lastName,
+        address,
+        state,
+        city,
+        phone,
+        email,
+        birthdate,
+        created
+    )
+VALUES
+    (
+        'Bong',
+        'LEE',
+        '123 St',
+        'NV',
+        'Las Vegas',
+        '1112223333',
+        'test@test.com',
+        '1991-12-12',
+        UTC_TIMESTAMP()
+    );
+
+INSERT INTO
     petTypes (name)
 VALUES
     ('DOG');

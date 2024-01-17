@@ -20,8 +20,8 @@
             "type": "go",
             "request": "launch",
             "mode": "test",
-            "program": "${workspaceFolder}/internal/models/owners_test.go",
-            "cwd": "${workspaceRoot}",
+            "program": "${workspaceFolder}/internal/models/pets_test.go",
+            "cwd": "${workspaceRoot}/internal/models",
             "args": []
         },
     ]
