@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"io"
 	"log/slog"
 	"net/http"
@@ -53,4 +54,19 @@ func newTestServer(t *testing.T, routes http.Handler) *testServer {
 	}
 
 	return &testServer{ts}
+}
+
+func (ts *testServer) postReq(t *testing.T, urlPath string, json []byte) (int, http.Header, string) {
+	rs, err := ts.Client().Post(ts.URL+urlPath, "application/json", bytes.NewReader(json))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer rs.Body.Close()
+	body, err := io.ReadAll(rs.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return rs.StatusCode, rs.Header, string(body)
 }

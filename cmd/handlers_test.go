@@ -1,12 +1,14 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
-	"io"
 	"net/http"
 	"regexp"
 	"testing"
+	"time"
+
+	"pet-clinic.bonglee.com/internal/assert"
+	"pet-clinic.bonglee.com/internal/models"
 )
 
 var getFormTextDangerHtml = regexp.MustCompile(`<div class="form-text text-danger">(.*) `)
@@ -48,49 +50,93 @@ func TestNewPetTypePost(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+
 			data := map[string]string{"newPetType": test.petType}
 			jsonData, _ := json.Marshal(data)
-			rs, err := testServer.Client().Post(testServer.URL+test.urlPath, "application/json", bytes.NewReader(jsonData))
-			if err != nil {
-				t.Fatal(err)
-			}
 
-			defer rs.Body.Close()
-			body, err := io.ReadAll(rs.Body)
-			if err != nil {
-				t.Fatal(err)
-			}
+			statusCode, _, body := testServer.postReq(t, test.urlPath, jsonData)
+
 			matches := getFormTextDangerHtml.FindStringSubmatch(string(body))
 
-			if len(matches) > 1 && matches[1] != test.errMsg {
-				t.Errorf("got: %s; want %s", matches[1], test.errMsg)
+			if len(matches) > 1 {
+				assert.Equal(t, matches[1], test.errMsg)
 			}
 
-			if rs.StatusCode != test.wantCode {
-				t.Errorf("got: %v; want: %v", rs.StatusCode, test.wantCode)
-			}
+			assert.Equal(t, statusCode, test.wantCode)
 		})
 	}
 }
 
 func TestOwnerCreatePost(t *testing.T) {
-	// app := newTestApp(t)
-	// testServer := newTestServer(t, app.routes())
+	app := newTestApp(t)
+	testServer := newTestServer(t, app.routes())
 
-	// tests := []struct {
-	// 	name  string
-	// 	owner models.Owner
-	// 	urlPath string
-	// 	wantCode int
-	// 	alertMsg string
-	// 	formTag string
-	// } {
-	// 	{
-	// 		name: "Valid new owner request",
-	// 		owner: models.Owner{
-	// 			fi
-	// 		},
-	// 	}
-	// }
+	tests := []struct {
+		name     string
+		owner    models.Owner
+		urlPath  string
+		wantCode int
+		formTag  string
+	}{
+		{
+			name:    "Valid new owner request",
+			urlPath: "/owner/create",
+			owner: models.Owner{
+				FirstName: "Bong",
+				LastName:  "Lee",
+				Email:     "test@test.com",
+				Phone:     "2223334444",
+				Birthdate: time.Now(),
+				Address:   "1234 S Street",
+				City:      "Las Vegas",
+				State:     "NV",
+			},
+			wantCode: http.StatusSeeOther,
+			formTag:  "",
+		},
+		{
+			name:    "Missing FirstName",
+			urlPath: "/owner/create",
+			owner: models.Owner{
+				FirstName: "",
+				LastName:  "Lee",
+				Email:     "test@test.com",
+				Phone:     "2223334444",
+				Birthdate: time.Now(),
+				Address:   "1234 S Street",
+				City:      "Las Vegas",
+				State:     "NV",
+			},
+			wantCode: http.StatusUnprocessableEntity,
+			formTag:  `<form hx-post='/owner/create' novalidate hx-target="body" hx-target-4*="body">`,
+		},
+		{
+			name:    "Owner model error",
+			urlPath: "/owner/create",
+			owner: models.Owner{
+				FirstName: "ownerModelError",
+				LastName:  "Lee",
+				Email:     "test@test.com",
+				Phone:     "2223334444",
+				Birthdate: time.Now(),
+				Address:   "1234 S Street",
+				City:      "Las Vegas",
+				State:     "NV",
+			},
+			wantCode: http.StatusUnprocessableEntity,
+			formTag:  `<form hx-post='/owner/create' novalidate hx-target="body" hx-target-4*="body">`,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			jsonData, _ := json.Marshal(test.owner)
+
+			statusCode, _, body := testServer.postReq(t, test.urlPath, jsonData)
+
+			assert.Equal(t, statusCode, test.wantCode)
+			assert.StringContains(t, string(body), test.formTag)
+		})
+	}
 
 }
