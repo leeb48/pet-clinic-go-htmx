@@ -54,7 +54,6 @@ func (app *application) ownerCreate(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, http.StatusOK, "owner-create.html", data)
 }
 
-// todo refactor to make it cleaner
 func (app *application) ownerCreatePost(w http.ResponseWriter, r *http.Request) {
 	var form newOwnerForm
 

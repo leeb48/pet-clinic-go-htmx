@@ -34,7 +34,7 @@ func (model *OwnerModel) Insert(firstName, lastName, addr, state, city, phone, e
 	stmt := `
 		INSERT INTO owners (firstName, lastName, address, state, city, phone, email, birthdate, created)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, UTC_TIMESTAMP())
-	`
+		`
 
 	result, err := model.DB.Exec(stmt, firstName, lastName, addr, state, city, phone, email, birthdate)
 	if err != nil {
@@ -53,4 +53,27 @@ func (model *OwnerModel) Insert(firstName, lastName, addr, state, city, phone, e
 	}
 
 	return int(ownerId), nil
+}
+
+func (model *OwnerModel) GetOwnerPageLen(pageSize int) (int, error) {
+
+	stmt := `
+		SELECT COUNT(*) FROM owners
+	`
+	var rowCount int
+
+	err := model.DB.QueryRow(stmt).Scan(&rowCount)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return rowCount / pageSize, nil
+}
+
+func (model *OwnerModel) GetOwnersPage(page, pageSize int) ([]Owner, error) {
+
+	owners := []Owner{}
+
+	return owners, nil
 }
