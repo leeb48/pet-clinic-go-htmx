@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"html/template"
 	"log"
 	"log/slog"
 	"net/http"
@@ -13,25 +12,10 @@ import (
 	"github.com/caarlos0/env"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
+	"pet-clinic.bonglee.com/internal/app"
+	"pet-clinic.bonglee.com/internal/handlers"
 	"pet-clinic.bonglee.com/internal/models"
 )
-
-type application struct {
-	logger        *slog.Logger
-	templateCache map[string]*template.Template
-	cfg           config
-	session       *scs.SessionManager
-	owners        models.OwnerModelInterface
-	petTypes      models.PetTypeModelInterface
-	pets          models.PetModelInterface
-}
-
-type config struct {
-	Addr            string `env:"ADDR"`
-	DSN             string `env:"DSN"`
-	SessionDuration int    `env:"SESSION_DURATION"`
-	DefaultPetType  int    `env:"DEFAULT_PET_TYPE"`
-}
 
 func main() {
 
@@ -46,7 +30,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	cfg := config{}
+	cfg := app.Config{}
 	if err := env.Parse(&cfg); err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
@@ -59,7 +43,7 @@ func main() {
 	}
 	defer db.Close()
 
-	templateCache, err := createTemplateCache()
+	templateCache, err := app.CreateTemplateCache()
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
@@ -68,26 +52,26 @@ func main() {
 	session := scs.New()
 	session.Lifetime = time.Duration(cfg.SessionDuration) * time.Hour
 
-	app := application{
-		logger:        logger,
-		templateCache: templateCache,
-		cfg:           cfg,
-		session:       session,
-		owners:        &models.OwnerModel{DB: db},
-		petTypes:      &models.PetTypeModel{DB: db},
-		pets:          &models.PetModel{DB: db},
+	app := app.App{
+		Logger:        logger,
+		TemplateCache: templateCache,
+		Cfg:           cfg,
+		Session:       session,
+		Owners:        &models.OwnerModel{DB: db},
+		PetTypes:      &models.PetTypeModel{DB: db},
+		Pets:          &models.PetModel{DB: db},
 	}
 
 	server := http.Server{
 		Addr:         cfg.Addr,
-		Handler:      app.routes(),
+		Handler:      handlers.Routes(&app),
 		ErrorLog:     slog.NewLogLogger(logger.Handler(), slog.LevelError),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
 
-	app.logger.Info("starting server", slog.String("addr", app.cfg.Addr))
+	app.Logger.Info("starting server", slog.String("addr", app.Cfg.Addr))
 
 	err = server.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 
