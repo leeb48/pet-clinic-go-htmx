@@ -17,7 +17,7 @@ type PetHandler struct {
 
 func NewPetHandler(app *app.App) *PetHandler {
 	return &PetHandler{
-		App: app,
+		app,
 	}
 }
 

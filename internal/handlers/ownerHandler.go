@@ -16,7 +16,7 @@ type OwnerHandler struct {
 
 func NewOwnerHandler(app *app.App) *OwnerHandler {
 	return &OwnerHandler{
-		App: app,
+		app,
 	}
 }
 

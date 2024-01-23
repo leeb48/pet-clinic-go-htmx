@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
+	"regexp"
 	"testing"
 	"time"
 
@@ -14,7 +15,7 @@ import (
 	"pet-clinic.bonglee.com/internal/models/mocks"
 )
 
-func newTestApp(t *testing.T) *App {
+func NewTestApp(t *testing.T) *App {
 	templateCache, err := CreateTemplateCache()
 	if err != nil {
 		t.Fatal(err)
@@ -35,11 +36,11 @@ func newTestApp(t *testing.T) *App {
 	return app
 }
 
-type testServer struct {
+type TestServer struct {
 	*httptest.Server
 }
 
-func newTestServer(t *testing.T, routes http.Handler) *testServer {
+func NewTestServer(t *testing.T, routes http.Handler) *TestServer {
 	ts := httptest.NewTLSServer(routes)
 
 	jar, err := cookiejar.New(nil)
@@ -53,10 +54,10 @@ func newTestServer(t *testing.T, routes http.Handler) *testServer {
 		return http.ErrUseLastResponse
 	}
 
-	return &testServer{ts}
+	return &TestServer{ts}
 }
 
-func (ts *testServer) postReq(t *testing.T, urlPath string, json []byte) (int, http.Header, string) {
+func (ts *TestServer) PostReq(t *testing.T, urlPath string, json []byte) (int, http.Header, string) {
 	rs, err := ts.Client().Post(ts.URL+urlPath, "application/json", bytes.NewReader(json))
 	if err != nil {
 		t.Fatal(err)
@@ -70,3 +71,5 @@ func (ts *testServer) postReq(t *testing.T, urlPath string, json []byte) (int, h
 
 	return rs.StatusCode, rs.Header, string(body)
 }
+
+var GetFormTextDangerHtml = regexp.MustCompile(`<div class="form-text text-danger">(.*) `)
