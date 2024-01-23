@@ -1,10 +1,12 @@
 package app
 
 import (
+	"fmt"
 	"html/template"
 	"io/fs"
 	"net/http"
 	"path/filepath"
+	"time"
 
 	"pet-clinic.bonglee.com/ui"
 )
@@ -34,6 +36,21 @@ func (app *App) NewTemplateData(r *http.Request) TemplateData {
 	}
 }
 
+func phoneNumber(phone string) string {
+	formatPhone := fmt.Sprintf("(%s) %s-%s", phone[0:3], phone[3:6], phone[6:])
+
+	return formatPhone
+}
+
+func birthDate(date time.Time) string {
+	return date.Format("01/02/2006")
+}
+
+var functions = template.FuncMap{
+	"phoneNumber": phoneNumber,
+	"birthdate":   birthDate,
+}
+
 func CreateTemplateCache() (map[string]*template.Template, error) {
 	cache := map[string]*template.Template{}
 
@@ -51,7 +68,10 @@ func CreateTemplateCache() (map[string]*template.Template, error) {
 			page,
 		}
 
-		ts := template.Must(template.ParseFS(ui.Files, patterns...))
+		ts := template.Must(template.
+			New(name).
+			Funcs(functions).
+			ParseFS(ui.Files, patterns...))
 
 		cache[name] = ts
 	}

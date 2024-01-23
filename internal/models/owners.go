@@ -24,6 +24,8 @@ type Owner struct {
 
 type OwnerModelInterface interface {
 	Insert(firstName, lastName, addr, state, city, phone, email, birthdate string) (int, error)
+	GetOwnersPageLen(pageSize int) (int, error)
+	GetOwners(page, pageSize int) ([]Owner, error)
 }
 
 type OwnerModel struct {
@@ -55,7 +57,7 @@ func (model *OwnerModel) Insert(firstName, lastName, addr, state, city, phone, e
 	return int(ownerId), nil
 }
 
-func (model *OwnerModel) GetOwnerPageLen(pageSize int) (int, error) {
+func (model *OwnerModel) GetOwnersPageLen(pageSize int) (int, error) {
 
 	stmt := `
 		SELECT COUNT(*) FROM owners
@@ -71,9 +73,33 @@ func (model *OwnerModel) GetOwnerPageLen(pageSize int) (int, error) {
 	return rowCount / pageSize, nil
 }
 
-func (model *OwnerModel) GetOwnersPage(page, pageSize int) ([]Owner, error) {
+func (model *OwnerModel) GetOwners(page, pageSize int) ([]Owner, error) {
 
 	owners := []Owner{}
+
+	offset := (page - 1) * pageSize
+
+	stmt := `
+		SELECT id, firstName, lastName, address, state, city, phone, email, birthdate
+		FROM owners
+		LIMIT ?
+		OFFSET ?
+	`
+
+	rows, err := model.DB.Query(stmt, pageSize, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var owner Owner
+		if err := rows.Scan(&owner.Id, &owner.FirstName, &owner.LastName, &owner.Address,
+			&owner.State, &owner.City, &owner.Phone, &owner.Email, &owner.Birthdate); err != nil {
+			return nil, err
+		}
+
+		owners = append(owners, owner)
+	}
 
 	return owners, nil
 }

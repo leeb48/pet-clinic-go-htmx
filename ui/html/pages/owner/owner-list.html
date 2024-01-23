@@ -15,14 +15,19 @@ Owners
         </tr>
     </thead>
     <tbody>
+
+
+        {{ range .Form.Owners }}
         <tr>
-            <td><a href="#" class="btn btn-outline-primary">Bong Lee</a></td>
-            <td>702-885-7091</td>
-            <td>test@test.com</td>
-            <td>03/14/1991</td>
+            <td><a href="#" class="btn btn-outline-primary">{{ .FirstName }} {{ .LastName }}</a></td>
+            <td>{{ .Phone | phoneNumber }}</td>
+            <td>{{ .Email }}</td>
+            <td>{{ .Birthdate | birthdate }}</td>
         </tr>
+        {{end}}
+
+
     </tbody>
 </table>
-
 <a href="/owner/create" class="btn btn-primary" role="button">Create New Owner</a>
 {{end}}

@@ -17,11 +17,11 @@ func (model *OwnerModel) Insert(firstName, lastName, addr, state, city, phone, e
 	return 0, nil
 }
 
-func (model *OwnerModel) GetOwnerPageLen() (int, error) {
+func (model *OwnerModel) GetOwnersPageLen(pageSize int) (int, error) {
 	return 0, nil
 }
 
-func (model *OwnerModel) GetOwnersPage(page, pageSize int) ([]models.Owner, error) {
+func (model *OwnerModel) GetOwners(page, pageSize int) ([]models.Owner, error) {
 
 	owners := []models.Owner{}
 

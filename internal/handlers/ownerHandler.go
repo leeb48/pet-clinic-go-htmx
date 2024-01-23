@@ -3,6 +3,8 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"pet-clinic.bonglee.com/internal/app"
@@ -25,8 +27,39 @@ func (handler *OwnerHandler) home(w http.ResponseWriter, r *http.Request) {
 	handler.Render(w, r, http.StatusOK, "home.html", data)
 }
 
+type ownerListForm struct {
+	PageLen int
+	Owners  []models.Owner
+}
+
 func (handler *OwnerHandler) ownerList(w http.ResponseWriter, r *http.Request) {
+
+	pageSize := r.URL.Query().Get("pageSize")
+
+	if strings.TrimSpace(pageSize) == "" {
+		pageSize = "10"
+	}
+
+	pageSizeInt, err := strconv.Atoi(pageSize)
+	if err != nil {
+		handler.ClientError(w, http.StatusBadRequest)
+	}
+
+	pageLen, err := handler.Owners.GetOwnersPageLen(pageSizeInt)
+	if err != nil {
+		handler.ServerError(w, r, err)
+	}
+
+	owners, err := handler.Owners.GetOwners(1, pageSizeInt)
+	if err != nil {
+		handler.ServerError(w, r, err)
+	}
+
 	data := app.TemplateData{}
+	data.Form = ownerListForm{
+		PageLen: pageLen,
+		Owners:  owners,
+	}
 	handler.Render(w, r, http.StatusOK, "owner-list.html", data)
 }
 
