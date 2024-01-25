@@ -26,6 +26,7 @@ type OwnerModelInterface interface {
 	Insert(firstName, lastName, addr, state, city, phone, email, birthdate string) (int, error)
 	GetOwnersPageLen(pageSize int) (int, error)
 	GetOwners(page, pageSize int) ([]Owner, error)
+	GetOwnerById(id string) (Owner, error)
 }
 
 type OwnerModel struct {
@@ -102,4 +103,28 @@ func (model *OwnerModel) GetOwners(page, pageSize int) ([]Owner, error) {
 	}
 
 	return owners, nil
+}
+
+func (model *OwnerModel) GetOwnerById(id string) (Owner, error) {
+
+	owner := Owner{}
+
+	getOwnerStmt := `
+		SELECT id, firstName, lastName, address, state, city, phone, email, birthdate
+		FROM owners
+		WHERE id = ?
+	`
+
+	rows, err := model.DB.Query(getOwnerStmt, id)
+	if err != nil {
+		return owner, err
+	}
+
+	for rows.Next() {
+		if err := rows.Scan(&owner.Id, &owner.FirstName, &owner.LastName, &owner.Address, &owner.State, &owner.City, &owner.Phone, &owner.Email, &owner.Birthdate); err != nil {
+			return owner, err
+		}
+	}
+
+	return owner, nil
 }

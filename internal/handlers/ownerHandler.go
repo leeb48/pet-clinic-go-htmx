@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/julienschmidt/httprouter"
 	"pet-clinic.bonglee.com/internal/app"
 	"pet-clinic.bonglee.com/internal/models"
 	"pet-clinic.bonglee.com/internal/validator"
@@ -35,12 +36,19 @@ type ownerListForm struct {
 func (handler *OwnerHandler) ownerList(w http.ResponseWriter, r *http.Request) {
 
 	pageSize := r.URL.Query().Get("pageSize")
-
 	if strings.TrimSpace(pageSize) == "" {
 		pageSize = "10"
 	}
-
 	pageSizeInt, err := strconv.Atoi(pageSize)
+	if err != nil {
+		handler.ClientError(w, http.StatusBadRequest)
+	}
+
+	page := r.URL.Query().Get("page")
+	if strings.TrimSpace(page) == "" {
+		page = "1"
+	}
+	pageInt, err := strconv.Atoi(page)
 	if err != nil {
 		handler.ClientError(w, http.StatusBadRequest)
 	}
@@ -50,7 +58,7 @@ func (handler *OwnerHandler) ownerList(w http.ResponseWriter, r *http.Request) {
 		handler.ServerError(w, r, err)
 	}
 
-	owners, err := handler.Owners.GetOwners(1, pageSizeInt)
+	owners, err := handler.Owners.GetOwners(pageInt, pageSizeInt)
 	if err != nil {
 		handler.ServerError(w, r, err)
 	}
@@ -173,4 +181,33 @@ func (handler *OwnerHandler) ownerCreatePost(w http.ResponseWriter, r *http.Requ
 	handler.Session.Put(r.Context(), app.FLASH_MSG, "User created")
 
 	http.Redirect(w, r, "/owner/create", http.StatusSeeOther)
+}
+
+type ownerDetailForm struct {
+	Owner models.Owner
+	Pets  []models.PetDetail
+}
+
+func (handler *OwnerHandler) ownerDetail(w http.ResponseWriter, r *http.Request) {
+
+	params := httprouter.ParamsFromContext(r.Context())
+	id := params.ByName("id")
+
+	owner, err := handler.Owners.GetOwnerById(id)
+	if err != nil {
+		handler.ServerError(w, r, err)
+	}
+
+	pets, err := handler.Pets.GetPetsByOwnerId(owner.Id)
+	if err != nil {
+		handler.ServerError(w, r, err)
+	}
+
+	data := handler.NewTemplateData(r)
+	data.Form = ownerDetailForm{
+		Owner: owner,
+		Pets:  pets,
+	}
+
+	handler.Render(w, r, http.StatusOK, "owner-detail.html", data)
 }
