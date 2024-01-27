@@ -46,9 +46,14 @@ func birthDate(date time.Time) string {
 	return date.Format("01/02/2006")
 }
 
+func YYYYMMDD(date time.Time) string {
+	return date.Format("2006-01-02")
+}
+
 var functions = template.FuncMap{
 	"phoneNumber": phoneNumber,
 	"birthdate":   birthDate,
+	"YYYYMMDD":    YYYYMMDD,
 }
 
 func CreateTemplateCache() (map[string]*template.Template, error) {

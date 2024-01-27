@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"pet-clinic.bonglee.com/internal/app"
+	"pet-clinic.bonglee.com/internal/constants"
 	"pet-clinic.bonglee.com/internal/models"
 	"pet-clinic.bonglee.com/internal/validator"
 )
@@ -151,7 +153,7 @@ func (handler *OwnerHandler) ownerCreatePost(w http.ResponseWriter, r *http.Requ
 			continue
 		}
 
-		birthdate, err := time.Parse("2006-01-02", (form.PetBirthdate[i]))
+		birthdate, err := time.Parse(constants.YYYY_MM_DD, (form.PetBirthdate[i]))
 		if err != nil {
 			handler.ServerError(w, r, err)
 			return
@@ -191,7 +193,10 @@ type ownerDetailForm struct {
 func (handler *OwnerHandler) ownerDetail(w http.ResponseWriter, r *http.Request) {
 
 	params := httprouter.ParamsFromContext(r.Context())
-	id := params.ByName("id")
+	id, err := strconv.Atoi(params.ByName("id"))
+	if err != nil {
+		handler.ServerError(w, r, err)
+	}
 
 	owner, err := handler.Owners.GetOwnerById(id)
 	if err != nil {
@@ -210,4 +215,76 @@ func (handler *OwnerHandler) ownerDetail(w http.ResponseWriter, r *http.Request)
 	}
 
 	handler.Render(w, r, http.StatusOK, "owner-detail.html", data)
+}
+
+type editOwnerForm struct {
+	Id                  int
+	FirstName           string `json:"firstName"`
+	LastName            string `json:"lastName"`
+	Address             string `json:"address"`
+	State               string `json:"state"`
+	City                string `json:"city"`
+	Phone               string `json:"phone"`
+	Email               string `json:"email"`
+	Birthdate           string `json:"birthdate"`
+	Pets                []models.PetDetail
+	ValidPetTypes       []string
+	validator.Validator `form:"-"`
+}
+
+func (handler *OwnerHandler) ownerEdit(w http.ResponseWriter, r *http.Request) {
+
+	params := httprouter.ParamsFromContext(r.Context())
+	id, err := strconv.Atoi(params.ByName("id"))
+	if err != nil {
+		handler.ServerError(w, r, err)
+	}
+
+	owner, err := handler.Owners.GetOwnerById(id)
+	if err != nil {
+		handler.ServerError(w, r, err)
+	}
+
+	validPetTypes, err := handler.PetTypes.GetAll()
+	if err != nil {
+		handler.ServerError(w, r, err)
+	}
+
+	pets, err := handler.Pets.GetPetsByOwnerId(id)
+	if err != nil {
+		handler.ServerError(w, r, err)
+	}
+
+	data := handler.NewTemplateData(r)
+	data.Form = editOwnerForm{
+		Id:            id,
+		FirstName:     owner.FirstName,
+		LastName:      owner.LastName,
+		Email:         owner.Email,
+		Phone:         owner.Phone,
+		Birthdate:     owner.Birthdate.Format(constants.YYYY_MM_DD),
+		Address:       owner.Address,
+		City:          owner.City,
+		State:         owner.State,
+		Pets:          pets,
+		ValidPetTypes: validPetTypes,
+	}
+
+	handler.Render(w, r, http.StatusOK, "owner-edit.html", data)
+}
+
+func (handler *OwnerHandler) ownerEditPut(w http.ResponseWriter, r *http.Request) {
+	// params := httprouter.ParamsFromContext(r.Context())
+	// id := params.ByName("id")
+
+	var form editOwnerForm
+
+	err := json.NewDecoder(r.Body).Decode(&form)
+	if err != nil {
+		handler.Logger.Error(err.Error())
+		return
+	}
+	fmt.Println(form)
+
+	// w.Header().Add("HX-Redirect", fmt.Sprintf("/owner/detail/%v", id))
 }

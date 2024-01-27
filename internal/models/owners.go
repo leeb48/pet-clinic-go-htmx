@@ -26,7 +26,7 @@ type OwnerModelInterface interface {
 	Insert(firstName, lastName, addr, state, city, phone, email, birthdate string) (int, error)
 	GetOwnersPageLen(pageSize int) (int, error)
 	GetOwners(page, pageSize int) ([]Owner, error)
-	GetOwnerById(id string) (Owner, error)
+	GetOwnerById(id int) (Owner, error)
 }
 
 type OwnerModel struct {
@@ -105,7 +105,7 @@ func (model *OwnerModel) GetOwners(page, pageSize int) ([]Owner, error) {
 	return owners, nil
 }
 
-func (model *OwnerModel) GetOwnerById(id string) (Owner, error) {
+func (model *OwnerModel) GetOwnerById(id int) (Owner, error) {
 
 	owner := Owner{}
 

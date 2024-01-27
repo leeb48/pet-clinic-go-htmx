@@ -28,6 +28,6 @@ func (model *OwnerModel) GetOwners(page, pageSize int) ([]models.Owner, error) {
 	return owners, nil
 }
 
-func (model *OwnerModel) GetOwnerById(id string) (models.Owner, error) {
+func (model *OwnerModel) GetOwnerById(id int) (models.Owner, error) {
 	return models.Owner{}, nil
 }

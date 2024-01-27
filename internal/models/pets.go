@@ -19,10 +19,10 @@ type Pet struct {
 }
 
 type PetDetail struct {
-	Id        int
-	Name      string
-	Birthdate time.Time
-	PetType   string
+	Id        int       `json:"Id"`
+	Name      string    `json:"Name"`
+	Birthdate time.Time `json:"Birthdate"`
+	PetType   string    `json:"PetType"`
 }
 
 type PetModelInterface interface {
