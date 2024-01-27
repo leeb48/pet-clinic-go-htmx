@@ -19,8 +19,8 @@ Owner Detail
             <div class="col-lg-4">
                 <div class="card mb-4">
                     <div class="card-body text-center">
-                        <h5 class="my-3">LastName,FirstName</h5>
-                        <p class="text-muted mb-4">Birthdate</p>
+                        <h5 class="my-3">{{ .Owner.LastName }}, {{ .Owner.FirstName }}</h5>
+                        <p class="text-muted mb-4">{{ .Owner.Birthdate | birthdate }}</p>
                         <div class="d-flex justify-content-center mb-2">
                             <a href="/owner/@Model.Id/edit" type="button" class="btn btn-primary ms-2">Edit</a>
                             <button type="button" class="btn btn-outline-danger ms-2">Remove</button>
@@ -37,7 +37,7 @@ Owner Detail
                                 <p class="mb-0">Email</p>
                             </div>
                             <div class="col-sm-9">
-                                <p class="text-muted mb-0">Email</p>
+                                <p class="text-muted mb-0">{{ .Owner.Email }}</p>
                             </div>
                         </div>
                         <hr>
@@ -46,7 +46,7 @@ Owner Detail
                                 <p class="mb-0">Mobile</p>
                             </div>
                             <div class="col-sm-9">
-                                <p class="text-muted mb-0">PhoneNumber</p>
+                                <p class="text-muted mb-0">{{ .Owner.Phone | phoneNumber}}</p>
                             </div>
                         </div>
                         <hr>
@@ -55,7 +55,9 @@ Owner Detail
                                 <p class="mb-0">Address</p>
                             </div>
                             <div class="col-sm-9">
-                                <p class="text-muted mb-0">Full Address</p>
+                                <p class="text-muted mb-0">
+                                    {{ .Owner.Address }}, {{ .Owner.City }} {{ .Owner.State }}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -76,12 +78,14 @@ Owner Detail
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        {{ range .Pets }}
                                         <tr>
-                                            <th scope="row">Name</th>
-                                            <td>PetTypeName</td>
-                                            <td>Birthdate</td>
+                                            <th scope="row">{{ .Name }}</th>
+                                            <td>{{ .PetType }}</td>
+                                            <td>{{ .Birthdate | birthdate }}</td>
                                             <td><button class="btn btn-outline-danger">X</button></td>
                                         </tr>
+                                        {{end}}
                                     </tbody>
                                 </table>
 

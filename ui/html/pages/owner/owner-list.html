@@ -18,7 +18,9 @@ Owners
 
         {{ range .Form.Owners }}
         <tr>
-            <td><a href="#" class="btn btn-outline-primary">{{ .FirstName }} {{ .LastName }}</a></td>
+            <td>
+                <a href="/owner/detail/{{ .Id }}" class="btn btn-outline-primary">{{ .FirstName }} {{ .LastName }}</a>
+            </td>
             <td>{{ .Phone | phoneNumber }}</td>
             <td>{{ .Email }}</td>
             <td>{{ .Birthdate | birthdate }}</td>
