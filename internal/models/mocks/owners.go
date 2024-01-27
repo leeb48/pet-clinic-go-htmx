@@ -1,6 +1,10 @@
 package mocks
 
-import "errors"
+import (
+	"errors"
+
+	"pet-clinic.bonglee.com/internal/models"
+)
 
 type OwnerModel struct{}
 
@@ -11,4 +15,19 @@ func (model *OwnerModel) Insert(firstName, lastName, addr, state, city, phone, e
 	}
 
 	return 0, nil
+}
+
+func (model *OwnerModel) GetOwnersPageLen(pageSize int) (int, error) {
+	return 0, nil
+}
+
+func (model *OwnerModel) GetOwners(page, pageSize int) ([]models.Owner, error) {
+
+	owners := []models.Owner{}
+
+	return owners, nil
+}
+
+func (model *OwnerModel) GetOwnerById(id string) (models.Owner, error) {
+	return models.Owner{}, nil
 }

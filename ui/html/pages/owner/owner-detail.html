@@ -1,0 +1,107 @@
+{{ define "title" }}
+Owner Detail
+{{ end }}
+
+{{ define "main"}}
+
+<hr />
+
+{{ with .Form }}
+
+{{ if eq .Owner.Id 0 }}
+<h1>Owner does not exist</h1>
+{{ else }}
+
+<section style="background-color: #eee;">
+    <div class="container py-5">
+
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-body text-center">
+                        <h5 class="my-3">{{ .Owner.LastName }}, {{ .Owner.FirstName }}</h5>
+                        <p class="text-muted mb-4">{{ .Owner.Birthdate | birthdate }}</p>
+                        <div class="d-flex justify-content-center mb-2">
+                            <a href="/owner/@Model.Id/edit" type="button" class="btn btn-primary ms-2">Edit</a>
+                            <button type="button" class="btn btn-outline-danger ms-2">Remove</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <p class="mb-0">Email</p>
+                            </div>
+                            <div class="col-sm-9">
+                                <p class="text-muted mb-0">{{ .Owner.Email }}</p>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <p class="mb-0">Mobile</p>
+                            </div>
+                            <div class="col-sm-9">
+                                <p class="text-muted mb-0">{{ .Owner.Phone | phoneNumber}}</p>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <p class="mb-0">Address</p>
+                            </div>
+                            <div class="col-sm-9">
+                                <p class="text-muted mb-0">
+                                    {{ .Owner.Address }}, {{ .Owner.City }} {{ .Owner.State }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card mb-4 mb-md-0">
+                            <div class="card-body">
+
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Name</th>
+                                            <th scope="col">Type</th>
+                                            <th scope="col">Birthdate</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {{ range .Pets }}
+                                        <tr>
+                                            <th scope="row">{{ .Name }}</th>
+                                            <td>{{ .PetType }}</td>
+                                            <td>{{ .Birthdate | birthdate }}</td>
+                                            <td><button class="btn btn-outline-danger">X</button></td>
+                                        </tr>
+                                        {{end}}
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+</section>
+
+{{ end }}
+
+{{ end }}
+
+<hr />
+
+{{ end }}

@@ -4,7 +4,7 @@ Owners
 
 {{define "main"}}
 <h1>Owner Page</h1>
-
+<a href="/owner/create" class="btn btn-primary" role="button">Create New Owner</a>
 <table class="table">
     <thead>
         <tr>
@@ -15,14 +15,33 @@ Owners
         </tr>
     </thead>
     <tbody>
+
+        {{ range .Form.Owners }}
         <tr>
-            <td><a href="#" class="btn btn-outline-primary">Bong Lee</a></td>
-            <td>702-885-7091</td>
-            <td>test@test.com</td>
-            <td>03/14/1991</td>
+            <td>
+                <a href="/owner/detail/{{ .Id }}" class="btn btn-outline-primary">{{ .FirstName }} {{ .LastName }}</a>
+            </td>
+            <td>{{ .Phone | phoneNumber }}</td>
+            <td>{{ .Email }}</td>
+            <td>{{ .Birthdate | birthdate }}</td>
         </tr>
+        {{end}}
+
     </tbody>
 </table>
+<nav aria-label="Page navigation example">
+    <ul class="pagination" id="owner-pagination">
+    </ul>
+</nav>
 
-<a href="/owner/create" class="btn btn-primary" role="button">Create New Owner</a>
+<script>
+    const pageLen = '{{ .Form.PageLen }}'
+    const pageUl = document.getElementById('owner-pagination')
+
+    for (let i = 0; i <= pageLen; ++i) {
+        const page = `<li class="page-item"><a class="page-link" href="/owner?page=${i + 1}">${i + 1}</a></li>`
+        pageUl.insertAdjacentHTML('beforeend', page)
+    }
+</script>
+
 {{end}}

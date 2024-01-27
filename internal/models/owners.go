@@ -24,6 +24,9 @@ type Owner struct {
 
 type OwnerModelInterface interface {
 	Insert(firstName, lastName, addr, state, city, phone, email, birthdate string) (int, error)
+	GetOwnersPageLen(pageSize int) (int, error)
+	GetOwners(page, pageSize int) ([]Owner, error)
+	GetOwnerById(id string) (Owner, error)
 }
 
 type OwnerModel struct {
@@ -34,7 +37,7 @@ func (model *OwnerModel) Insert(firstName, lastName, addr, state, city, phone, e
 	stmt := `
 		INSERT INTO owners (firstName, lastName, address, state, city, phone, email, birthdate, created)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, UTC_TIMESTAMP())
-	`
+		`
 
 	result, err := model.DB.Exec(stmt, firstName, lastName, addr, state, city, phone, email, birthdate)
 	if err != nil {
@@ -53,4 +56,75 @@ func (model *OwnerModel) Insert(firstName, lastName, addr, state, city, phone, e
 	}
 
 	return int(ownerId), nil
+}
+
+func (model *OwnerModel) GetOwnersPageLen(pageSize int) (int, error) {
+
+	stmt := `
+		SELECT COUNT(*) FROM owners
+	`
+	var rowCount int
+
+	err := model.DB.QueryRow(stmt).Scan(&rowCount)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return rowCount / pageSize, nil
+}
+
+func (model *OwnerModel) GetOwners(page, pageSize int) ([]Owner, error) {
+
+	owners := []Owner{}
+
+	offset := (page - 1) * pageSize
+
+	stmt := `
+		SELECT id, firstName, lastName, address, state, city, phone, email, birthdate
+		FROM owners
+		LIMIT ?
+		OFFSET ?
+	`
+
+	rows, err := model.DB.Query(stmt, pageSize, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var owner Owner
+		if err := rows.Scan(&owner.Id, &owner.FirstName, &owner.LastName, &owner.Address,
+			&owner.State, &owner.City, &owner.Phone, &owner.Email, &owner.Birthdate); err != nil {
+			return nil, err
+		}
+
+		owners = append(owners, owner)
+	}
+
+	return owners, nil
+}
+
+func (model *OwnerModel) GetOwnerById(id string) (Owner, error) {
+
+	owner := Owner{}
+
+	getOwnerStmt := `
+		SELECT id, firstName, lastName, address, state, city, phone, email, birthdate
+		FROM owners
+		WHERE id = ?
+	`
+
+	rows, err := model.DB.Query(getOwnerStmt, id)
+	if err != nil {
+		return owner, err
+	}
+
+	for rows.Next() {
+		if err := rows.Scan(&owner.Id, &owner.FirstName, &owner.LastName, &owner.Address, &owner.State, &owner.City, &owner.Phone, &owner.Email, &owner.Birthdate); err != nil {
+			return owner, err
+		}
+	}
+
+	return owner, nil
 }

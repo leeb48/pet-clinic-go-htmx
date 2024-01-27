@@ -18,8 +18,16 @@ type Pet struct {
 	OwnerId   int
 }
 
+type PetDetail struct {
+	Id        int
+	Name      string
+	Birthdate time.Time
+	PetType   string
+}
+
 type PetModelInterface interface {
 	Insert(name string, birthdate time.Time, petTypeId, ownerId int) error
+	GetPetsByOwnerId(ownerId int) ([]PetDetail, error)
 }
 
 type PetModel struct {
@@ -47,4 +55,31 @@ func (model *PetModel) Insert(name string, birthdate time.Time, petTypeId, owner
 	}
 
 	return nil
+}
+
+func (model *PetModel) GetPetsByOwnerId(ownerId int) ([]PetDetail, error) {
+
+	petDetails := []PetDetail{}
+
+	stmt := `
+		SELECT pt.id, pt.name, pt.birthdate, py.name
+		FROM pets pt
+		INNER JOIN petTypes py on py.id = pt.petTypeId
+		WHERE pt.ownerId = ?
+	`
+
+	rows, err := model.DB.Query(stmt, ownerId)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var petDetail PetDetail
+		if err := rows.Scan(&petDetail.Id, &petDetail.Name, &petDetail.Birthdate, &petDetail.PetType); err != nil {
+			return nil, err
+		}
+		petDetails = append(petDetails, petDetail)
+	}
+
+	return petDetails, nil
 }
