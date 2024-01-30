@@ -287,5 +287,30 @@ func (handler *OwnerHandler) ownerEditPut(w http.ResponseWriter, r *http.Request
 	}
 	fmt.Println(form)
 
+	form.Validator.CheckField(validator.NotBlank(form.FirstName), "firstName", "First name cannot be empty")
+	form.Validator.CheckField(validator.NotBlank(form.LastName), "lastName", "Last name cannot be empty")
+	form.Validator.CheckField(validator.NotBlank(form.Address), "address", "Address cannot be empty")
+	form.Validator.CheckField(validator.NotBlank(form.State), "state", "State cannot be empty")
+	form.Validator.CheckField(validator.NotBlank(form.City), "city", "City cannot be empty")
+	form.Validator.CheckField(validator.NotBlank(form.Phone), "phone", "Phone cannot be empty")
+	form.Validator.CheckField(validator.NotBlank(form.Email), "email", "Email cannot be empty")
+	form.Validator.CheckField(validator.Matches(form.Email, validator.EmailRX), "email", "Email invalid")
+	form.Validator.CheckField(validator.NotBlank(form.Birthdate), "birthdate", "Birthdate cannot be empty")
+
+	if !form.Validator.Valid() {
+
+		data := handler.NewTemplateData(r)
+
+		validPetTypes, err := handler.PetTypes.GetAll()
+		if err != nil {
+			handler.ServerError(w, r, err)
+		}
+		form.ValidPetTypes = validPetTypes
+
+		data.Form = form
+		handler.Render(w, r, http.StatusUnprocessableEntity, "owner-edit.html", data)
+		return
+	}
+
 	// w.Header().Add("HX-Redirect", fmt.Sprintf("/owner/detail/%v", id))
 }

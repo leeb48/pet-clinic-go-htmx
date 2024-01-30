@@ -11,7 +11,7 @@ Owner Edit
 {{ end }}
 
 <h1>Owner Edit Form</h1>
-<form hx-put='/owner/edit/{{ .Form.Id }}' novalidate hx-target="body" hx-target-4*="body" hx-swap="none">
+<form hx-put='/owner/edit/{{ .Form.Id }}' novalidate hx-target="body" hx-target-4*="body">
     <input type="hidden" name="id" value="{{ .Form.Id }}">
     <div class="row mb-3">
         <div class="col">
@@ -167,12 +167,14 @@ Owner Edit
                     <input type="date" class="form-control" id="pet-birthdate-input" name="petBirthdate">
                 </td>
                 <td>
-                    <button onclick="addNewPet(event)" class="btn btn-outline-success">Add</button>
+                    <button type="button" onclick="addNewPet()" class="btn btn-outline-success">Add</button>
                 </td>
             </tr>
 
             {{ range .Form.Pets }}
             {{ $pet := .}}
+
+            {{ if .Id }}
             <tr petId="{{ .Id }}">
                 <th scope="row">
                     <input type="hidden" name="petId" value="{{ .Id }}">
@@ -196,6 +198,30 @@ Owner Edit
                         class="btn btn-outline-danger">X</button>
                 </td>
             </tr>
+
+            {{ else }}
+
+            <tr>
+                <th scope="row">
+                    <input type="hidden" name="petId" value="{{ .Id }}" readonly>
+                    <input type="text" class="form-control-plaintext" id="pet-name-input" name="petName"
+                        placeholder="Pet Name" value="{{ .Name }}" readonly>
+                </th>
+                <td>
+                    <input class="form-control-plaintext" type="text" name="petType" value="{{ .PetType }}" readonly>
+                </td>
+                <td>
+                    <input type="date" class="form-control-plaintext" id="pet-birthdate-input" name="petBirthdate"
+                        value="{{ .Birthdate | YYYYMMDD }}" readonly>
+                </td>
+                <td>
+                    <button type="button" id="add-pet-btn" onclick="deleteRow(this)"
+                        class="btn btn-outline-danger">X</button>
+                </td>
+            </tr>
+
+            {{ end }}
+
             {{ end }}
 
         </tbody>
@@ -206,6 +232,18 @@ Owner Edit
 
 <script>
 
+    htmx.onLoad(function (content) {
+        // pre-select the state during re-render
+        const stateOptions = document
+            .getElementById('state')
+            .getElementsByTagName('option')
+        for (const state of stateOptions) {
+            if (state.value == '{{ .Form.State }}') {
+                state.selected = 'selected'
+            }
+        }
+    })
+
     function markPetToDelete(event) {
         const target = event.target
 
@@ -213,24 +251,11 @@ Owner Edit
         row.classList.toggle('table-danger')
     }
 
-
-    // pre-select the state during re-render
-    const stateOptions = document
-        .getElementById('state')
-        .getElementsByTagName('option')
-    for (const state of stateOptions) {
-        if (state.value == '{{ .Form.State }}') {
-            state.selected = 'selected'
-        }
-    }
-
-    document.addEventListener('htmx:configRequest', (event) => {
-        params = event.detail.parameters
-        params.id = Number(params.id)
+    function formatPetData(params) {
 
         const pets = []
 
-        for (let i = 0; i < params['petName'].length; ++i) {
+        for (let i = 0; i < params['petName']?.length; ++i) {
             const petId = params['petId'][i]
             const petName = params['petName'][i]
             const petType = params['petType'][i]
@@ -248,13 +273,10 @@ Owner Edit
             pets.push(pet)
         }
 
-        delete params['petId']
-        delete params['petName']
-        delete params['petType']
-        delete params['petBirthdate']
-
         params.pets = pets
+    }
 
+    function getPetsToDelete(params) {
         const deletePetIds = []
         const petDeleteRows = document.querySelectorAll('table tr.table-danger')
         for (const row of petDeleteRows) {
@@ -263,11 +285,20 @@ Owner Edit
         }
 
         params.deletePetIds = deletePetIds
+    }
+
+    document.addEventListener('htmx:configRequest', (event) => {
+        params = event.detail.parameters
+        params.id = Number(params.id)
+
+        formatPetData(params)
+        getPetsToDelete(params)
+
+        console.log(params)
     })
 
 
-    function addNewPet(event) {
-        event.preventDefault()
+    function addNewPet() {
         const petName = document.getElementById('pet-name-input').value || 'Mango'
         const petType = document.getElementById('pet-type-input').value || 'DOG'
         const petBirthdate = document.getElementById('pet-birthdate-input').value || '2017-05-05'
@@ -291,6 +322,7 @@ Owner Edit
     }
 
     function deleteRow(row) {
+        console.log(row)
         row.parentNode.parentNode.remove()
     }
 
