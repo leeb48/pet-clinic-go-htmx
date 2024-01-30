@@ -219,15 +219,16 @@ func (handler *OwnerHandler) ownerDetail(w http.ResponseWriter, r *http.Request)
 
 type editOwnerForm struct {
 	Id                  int
-	FirstName           string `json:"firstName"`
-	LastName            string `json:"lastName"`
-	Address             string `json:"address"`
-	State               string `json:"state"`
-	City                string `json:"city"`
-	Phone               string `json:"phone"`
-	Email               string `json:"email"`
-	Birthdate           string `json:"birthdate"`
-	Pets                []models.PetDetail
+	FirstName           string             `json:"firstName"`
+	LastName            string             `json:"lastName"`
+	Address             string             `json:"address"`
+	State               string             `json:"state"`
+	City                string             `json:"city"`
+	Phone               string             `json:"phone"`
+	Email               string             `json:"email"`
+	Birthdate           string             `json:"birthdate"`
+	Pets                []models.PetDetail `json:"pets"`
+	DeletePetIds        []int              `json:"deletePetIds"`
 	ValidPetTypes       []string
 	validator.Validator `form:"-"`
 }
