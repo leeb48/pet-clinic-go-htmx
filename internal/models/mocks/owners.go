@@ -31,3 +31,8 @@ func (model *OwnerModel) GetOwners(page, pageSize int) ([]models.Owner, error) {
 func (model *OwnerModel) GetOwnerById(id int) (models.Owner, error) {
 	return models.Owner{}, nil
 }
+
+func (model *OwnerModel) UpdateOwner(id int, firstName, lastName, addr, state, city, phone, email, birthdate string) error {
+
+	return nil
+}

@@ -184,11 +184,11 @@ Owner Create
     })
     document.getElementById('add-pet-btn').onclick = (e) => {
         e.preventDefault();
-        const petName = document.getElementById('pet-name-input').value || 'Mango';
-        const petType = document.getElementById('pet-type-input').value || 'DOG';
-        const petBirthdate = document.getElementById('pet-birthdate-input').value || '2017-05-05';
+        const petNameInput = document.getElementById('pet-name-input');
+        const petTypeInput = document.getElementById('pet-type-input');
+        const petBirthdateInput = document.getElementById('pet-birthdate-input');
 
-        if (!petName || !petType || !petBirthdate) return;
+        if (!petNameInput.value || !petTypeInput.value || !petBirthdateInput.value) return;
 
         const petTable = document.getElementById('pet-table');
         const row = petTable.insertRow();
@@ -197,10 +197,14 @@ Owner Create
         const petBirthdateCell = row.insertCell(2);
         const remove = row.insertCell(3);
 
-        nameCell.innerHTML = `<input class="form-control-plaintext" type="text" name="petName" value=${petName} readonly>`
-        petTypeCell.innerHTML = `<input class="form-control-plaintext" type="text" name="petType" value=${petType} readonly>`
-        petBirthdateCell.innerHTML = `<input class="form-control-plaintext" type="text" name="petBirthdate" value=${petBirthdate} readonly>`
+        nameCell.innerHTML = `<input class="form-control-plaintext" type="text" name="petName" value=${petNameInput.value} readonly>`
+        petTypeCell.innerHTML = `<input class="form-control-plaintext" type="text" name="petType" value=${petTypeInput.value} readonly>`
+        petBirthdateCell.innerHTML = `<input class="form-control-plaintext" type="text" name="petBirthdate" value=${petBirthdateInput.value} readonly>`
         remove.innerHTML = `<button type="button" class="btn btn-outline-danger" onclick="deleteRow(this)">X</button>`
+
+        petNameInput.value = ''
+        petTypeInput.value = ''
+        petBirthdateInput.value = ''
     }
 
     function deleteRow(row) {

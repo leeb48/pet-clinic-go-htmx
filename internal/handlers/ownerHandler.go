@@ -275,17 +275,20 @@ func (handler *OwnerHandler) ownerEdit(w http.ResponseWriter, r *http.Request) {
 }
 
 func (handler *OwnerHandler) ownerEditPut(w http.ResponseWriter, r *http.Request) {
-	// params := httprouter.ParamsFromContext(r.Context())
-	// id := params.ByName("id")
+	params := httprouter.ParamsFromContext(r.Context())
+	id, err := strconv.Atoi(params.ByName("id"))
+	if err != nil {
+		handler.ClientError(w, http.StatusBadRequest)
+		return
+	}
 
 	var form editOwnerForm
 
-	err := json.NewDecoder(r.Body).Decode(&form)
+	err = json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
 		handler.Logger.Error(err.Error())
 		return
 	}
-	fmt.Println(form)
 
 	form.Validator.CheckField(validator.NotBlank(form.FirstName), "firstName", "First name cannot be empty")
 	form.Validator.CheckField(validator.NotBlank(form.LastName), "lastName", "Last name cannot be empty")
@@ -312,5 +315,11 @@ func (handler *OwnerHandler) ownerEditPut(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	// w.Header().Add("HX-Redirect", fmt.Sprintf("/owner/detail/%v", id))
+	err = handler.Owners.UpdateOwner(id, form.FirstName, form.LastName, form.Address, form.State, form.City, form.Phone, form.Email, form.Birthdate)
+	if err != nil {
+		handler.ServerError(w, r, err)
+		return
+	}
+
+	w.Header().Add("HX-Redirect", fmt.Sprintf("/owner/detail/%v", id))
 }
