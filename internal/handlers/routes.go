@@ -20,6 +20,8 @@ func Routes(app *app.App) *httprouter.Router {
 	router.Handler(http.MethodGet, "/owner/create", dynamic.ThenFunc(ownerHandler.ownerCreate))
 	router.Handler(http.MethodPost, "/owner/create", dynamic.ThenFunc(ownerHandler.ownerCreatePost))
 	router.Handler(http.MethodGet, "/owner/detail/:id", dynamic.ThenFunc(ownerHandler.ownerDetail))
+	router.Handler(http.MethodGet, "/owner/edit/:id", dynamic.ThenFunc(ownerHandler.ownerEdit))
+	router.Handler(http.MethodPut, "/owner/edit/:id", dynamic.ThenFunc(ownerHandler.ownerEditPut))
 
 	petHandler := NewPetHandler(app)
 	router.Handler(http.MethodGet, "/admin", dynamic.ThenFunc(petHandler.adminPage))

@@ -26,7 +26,8 @@ type OwnerModelInterface interface {
 	Insert(firstName, lastName, addr, state, city, phone, email, birthdate string) (int, error)
 	GetOwnersPageLen(pageSize int) (int, error)
 	GetOwners(page, pageSize int) ([]Owner, error)
-	GetOwnerById(id string) (Owner, error)
+	GetOwnerById(id int) (Owner, error)
+	UpdateOwner(id int, firstName, lastName, addr, state, city, phone, email, birthdate string) error
 }
 
 type OwnerModel struct {
@@ -105,7 +106,7 @@ func (model *OwnerModel) GetOwners(page, pageSize int) ([]Owner, error) {
 	return owners, nil
 }
 
-func (model *OwnerModel) GetOwnerById(id string) (Owner, error) {
+func (model *OwnerModel) GetOwnerById(id int) (Owner, error) {
 
 	owner := Owner{}
 
@@ -127,4 +128,31 @@ func (model *OwnerModel) GetOwnerById(id string) (Owner, error) {
 	}
 
 	return owner, nil
+}
+
+func (model *OwnerModel) UpdateOwner(id int, firstName, lastName, addr, state, city, phone, email, birthdate string) error {
+
+	stmt := `
+		UPDATE
+			owners
+		SET
+			firstName = COALESCE(NULLIF(?, ''), firstName),
+			lastName = COALESCE(NULLIF(?, ''), lastName),
+			email = COALESCE(NULLIF(?, ''), email),
+			phone = COALESCE(NULLIF(?, ''), phone),
+			birthdate = COALESCE(NULLIF(?, ''), birthdate),
+			address = COALESCE(NULLIF(?, ''), address),
+			city = COALESCE(NULLIF(?, ''), city),
+			state = COALESCE(NULLIF(?, ''), state),
+			modifiedDate = UTC_TIMESTAMP()
+		WHERE
+			id = ?;
+	`
+
+	_, err := model.DB.Exec(stmt, firstName, lastName, email, phone, birthdate, addr, city, state, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

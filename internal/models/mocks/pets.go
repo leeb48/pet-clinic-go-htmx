@@ -16,3 +16,12 @@ func (model *PetModel) Insert(name string, birthdate time.Time, petTypeId, owner
 func (model *PetModel) GetPetsByOwnerId(ownerId int) ([]models.PetDetail, error) {
 	return nil, nil
 }
+
+func (model *PetModel) Remove(id int) error {
+	return nil
+}
+
+func (model *PetModel) Update(id int, name string, birthdate time.Time, petTypeId int) error {
+
+	return nil
+}
