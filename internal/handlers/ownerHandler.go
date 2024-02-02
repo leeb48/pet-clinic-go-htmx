@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/julienschmidt/httprouter"
 	"pet-clinic.bonglee.com/internal/app"
 	"pet-clinic.bonglee.com/internal/constants"
+	"pet-clinic.bonglee.com/internal/constants/alertConstants"
 	"pet-clinic.bonglee.com/internal/models"
 	"pet-clinic.bonglee.com/internal/validator"
 )
@@ -74,17 +74,15 @@ func (handler *OwnerHandler) ownerList(w http.ResponseWriter, r *http.Request) {
 }
 
 type newOwnerForm struct {
-	FirstName           string   `json:"firstName"`
-	LastName            string   `json:"lastName"`
-	Address             string   `json:"address"`
-	State               string   `json:"state"`
-	City                string   `json:"city"`
-	Phone               string   `json:"phone"`
-	Email               string   `json:"email"`
-	Birthdate           string   `json:"birthdate"`
-	PetName             []string `json:"petName"`
-	PetType             []string `json:"petType"`
-	PetBirthdate        []string `json:"petBirthdate"`
+	FirstName           string             `json:"firstName"`
+	LastName            string             `json:"lastName"`
+	Address             string             `json:"address"`
+	State               string             `json:"state"`
+	City                string             `json:"city"`
+	Phone               string             `json:"phone"`
+	Email               string             `json:"email"`
+	Birthdate           string             `json:"birthdate"`
+	Pets                []models.PetDetail `json:"pets"`
 	ValidPetTypes       []string
 	validator.Validator `form:"-"`
 }
@@ -139,48 +137,27 @@ func (handler *OwnerHandler) ownerCreatePost(w http.ResponseWriter, r *http.Requ
 
 		data := handler.NewTemplateData(r)
 		data.Form = form
-		data.Alert = app.Alert{Msg: "Owner creation error", MsgType: app.DANGER}
+		data.Alert = app.Alert{Msg: "Owner creation error", MsgType: alertConstants.DANGER}
 
 		handler.Render(w, r, http.StatusUnprocessableEntity, "owner-create.html", data)
 		return
 	}
 
-	pets := []models.Pet{}
+	for _, pet := range form.Pets {
 
-	for i := 0; i < len(form.PetName); i++ {
-
-		if form.PetName[i] == "" || form.PetType[i] == "" || form.PetBirthdate[i] == "" {
-			continue
-		}
-
-		birthdate, err := time.Parse(constants.YYYY_MM_DD, (form.PetBirthdate[i]))
-		if err != nil {
-			handler.ServerError(w, r, err)
-			return
-		}
-
-		petTypeId, err := handler.PetTypes.GetIdFromPetType(form.PetType[i])
+		petTypeId, err := handler.PetTypes.GetIdFromPetType(pet.PetType)
 		if err != nil {
 			handler.Logger.Error(err.Error())
 			petTypeId = handler.Cfg.DefaultPetType
 		}
 
-		pets = append(pets, models.Pet{
-			Name:      form.PetName[i],
-			Birthdate: birthdate,
-			PetTypeId: petTypeId,
-			OwnerId:   ownerId,
-		})
-	}
-
-	for _, pet := range pets {
-		err := handler.Pets.Insert(pet.Name, pet.Birthdate, pet.PetTypeId, pet.OwnerId)
+		err = handler.Pets.Insert(pet.Name, pet.Birthdate, petTypeId, ownerId)
 		if err != nil {
 			handler.Logger.Error(err.Error())
 		}
 	}
 
-	handler.Session.Put(r.Context(), app.FLASH_MSG, "User created")
+	handler.Session.Put(r.Context(), alertConstants.FLASH_MSG, "User created")
 
 	http.Redirect(w, r, "/owner/create", http.StatusSeeOther)
 }
@@ -320,6 +297,34 @@ func (handler *OwnerHandler) ownerEditPut(w http.ResponseWriter, r *http.Request
 		handler.ServerError(w, r, err)
 		return
 	}
+
+	for _, petId := range form.DeletePetIds {
+		err := handler.Pets.Remove(petId)
+		if err != nil {
+			handler.Logger.Error(err.Error())
+		}
+	}
+
+	for _, pet := range form.Pets {
+
+		petTypeId, err := handler.PetTypes.GetIdFromPetType(pet.PetType)
+		if err != nil {
+			handler.Logger.Error(err.Error())
+			petTypeId = handler.Cfg.DefaultPetType
+		}
+
+		if pet.Id == 0 {
+			err = handler.Pets.Insert(pet.Name, pet.Birthdate, petTypeId, id)
+		} else {
+			err = handler.Pets.Update(pet.Id, pet.Name, pet.Birthdate, petTypeId)
+		}
+
+		if err != nil {
+			handler.Logger.Error(err.Error())
+		}
+	}
+
+	handler.Session.Put(r.Context(), alertConstants.FLASH_MSG, "Edit Successful")
 
 	w.Header().Add("HX-Redirect", fmt.Sprintf("/owner/detail/%v", id))
 }

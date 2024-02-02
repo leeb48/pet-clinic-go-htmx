@@ -28,6 +28,8 @@ type PetDetail struct {
 type PetModelInterface interface {
 	Insert(name string, birthdate time.Time, petTypeId, ownerId int) error
 	GetPetsByOwnerId(ownerId int) ([]PetDetail, error)
+	Remove(id int) error
+	Update(id int, name string, birthdate time.Time, petTypeId int) error
 }
 
 type PetModel struct {
@@ -82,4 +84,38 @@ func (model *PetModel) GetPetsByOwnerId(ownerId int) ([]PetDetail, error) {
 	}
 
 	return petDetails, nil
+}
+
+func (model *PetModel) Remove(id int) error {
+	stmt := `
+		DELETE FROM pets WHERE id = ?;
+	`
+	_, err := model.DB.Exec(stmt, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (model *PetModel) Update(id int, name string, birthdate time.Time, petTypeId int) error {
+
+	stmt := `
+		UPDATE
+			pets
+		SET
+			name = COALESCE(NULLIF(?, ''), name),
+			birthdate = COALESCE(NULLIF(?, ''), birthdate),
+			petTypeId = COALESCE(NULLIF(?, ''), petTypeId),
+			modifiedDate = UTC_TIMESTAMP()
+		WHERE
+			id = ?;
+	`
+
+	_, err := model.DB.Exec(stmt, name, birthdate, petTypeId, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

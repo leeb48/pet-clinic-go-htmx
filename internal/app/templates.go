@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"pet-clinic.bonglee.com/internal/constants/alertConstants"
 	"pet-clinic.bonglee.com/ui"
 )
 
@@ -21,18 +22,9 @@ type TemplateData struct {
 	Form     any
 }
 
-const (
-	FLASH_MSG = "FLASH_MSG"
-	PRIMARY   = "primary"
-	DANGER    = "danger"
-	SUCCESS   = "success"
-	WARNING   = "warning"
-	INFO      = "info"
-)
-
 func (app *App) NewTemplateData(r *http.Request) TemplateData {
 	return TemplateData{
-		FlashMsg: app.Session.PopString(r.Context(), FLASH_MSG),
+		FlashMsg: app.Session.PopString(r.Context(), alertConstants.FLASH_MSG),
 	}
 }
 

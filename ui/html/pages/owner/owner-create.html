@@ -176,12 +176,54 @@ Owner Create
 
 
 <script>
+
+    htmx.onLoad(function (content) {
+        // pre-select the state during re-render
+        const stateOptions = document
+            .getElementById('state')
+            .getElementsByTagName('option')
+        for (const state of stateOptions) {
+            if (state.value == '{{ .Form.State }}') {
+                state.selected = 'selected'
+            }
+        }
+    })
+
+    function formatPetData(params) {
+
+        if (!Array.isArray(params['petName'])) {
+            params['petName'] = params['petName'].split()
+            params['petType'] = params['petType'].split()
+            params['petBirthdate'] = params['petBirthdate'].split()
+        }
+
+        const pets = []
+
+        for (let i = 0; i < params['petName']?.length; ++i) {
+            const petName = params['petName'][i]
+            const petType = params['petType'][i]
+            const petBirthdate = params['petBirthdate'][i]
+
+            if (petName == '') continue
+
+            const pet = {
+                name: petName,
+                petType: petType,
+                birthdate: new Date(petBirthdate).toISOString(),
+            }
+
+            pets.push(pet)
+        }
+
+        params.pets = pets
+    }
+
     document.addEventListener('htmx:configRequest', (event) => {
         params = event.detail.parameters
-        if (params['petName'] === '') params['petName'] = []
-        if (params['petType'] === '') params['petType'] = []
-        if (params['petBirthdate'] === '') params['petBirthdate'] = []
+
+        formatPetData(params)
     })
+
     document.getElementById('add-pet-btn').onclick = (e) => {
         e.preventDefault();
         const petNameInput = document.getElementById('pet-name-input');
