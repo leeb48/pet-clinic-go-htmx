@@ -36,3 +36,8 @@ func (model *OwnerModel) UpdateOwner(id int, firstName, lastName, addr, state, c
 
 	return nil
 }
+
+func (model *OwnerModel) Remove(id int) error {
+
+	return nil
+}

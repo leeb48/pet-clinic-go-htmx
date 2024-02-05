@@ -10,4 +10,4 @@ ALTER TABLE
 ADD
     ownerId INTEGER,
 ADD
-    CONSTRAINT FK_pets_owner_ownerId Foreign KEY (ownerId) REFERENCES owners(id)
+    CONSTRAINT FK_pets_owner_ownerId Foreign KEY (ownerId) REFERENCES owners(id) ON DELETE CASCADE ON UPDATE CASCADE;

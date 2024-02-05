@@ -12,6 +12,7 @@ Owner Detail
 <h1>Owner does not exist</h1>
 {{ else }}
 
+
 <section style="background-color: #eee;">
     <div class="container py-5">
 
@@ -23,7 +24,8 @@ Owner Detail
                         <p class="text-muted mb-4">{{ .Owner.Birthdate | birthdate }}</p>
                         <div class="d-flex justify-content-center mb-2">
                             <a href="/owner/edit/{{ .Owner.Id }}" type="button" class="btn btn-primary ms-2">Edit</a>
-                            <button type="button" class="btn btn-outline-danger ms-2">Remove</button>
+                            <button type="button" class="btn btn-outline-danger ms-2" data-bs-toggle="modal"
+                                data-bs-target="#removeOwnerModal">Remove</button>
                         </div>
                     </div>
                 </div>
@@ -95,6 +97,25 @@ Owner Detail
             </div>
         </div>
 </section>
+
+<!-- Modal -->
+<div class="modal fade" id="removeOwnerModal" tabindex="-1" aria-labelledby="removeOwnerModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="removeOwnerModal">Remove Owner</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Please confirm to remove the owner.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-outline-danger" hx-delete="/owner/{{ .Owner.Id }}">Remove</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 {{ end }}
 

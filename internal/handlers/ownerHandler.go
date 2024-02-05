@@ -65,7 +65,7 @@ func (handler *OwnerHandler) ownerList(w http.ResponseWriter, r *http.Request) {
 		handler.ServerError(w, r, err)
 	}
 
-	data := app.TemplateData{}
+	data := handler.NewTemplateData(r)
 	data.Form = ownerListForm{
 		PageLen: pageLen,
 		Owners:  owners,
@@ -158,8 +158,7 @@ func (handler *OwnerHandler) ownerCreatePost(w http.ResponseWriter, r *http.Requ
 	}
 
 	handler.Session.Put(r.Context(), alertConstants.FLASH_MSG, "User created")
-
-	http.Redirect(w, r, "/owner/create", http.StatusSeeOther)
+	w.Header().Add("HX-Redirect", fmt.Sprintf("/owner/detail/%v", ownerId))
 }
 
 type ownerDetailForm struct {
@@ -327,4 +326,22 @@ func (handler *OwnerHandler) ownerEditPut(w http.ResponseWriter, r *http.Request
 	handler.Session.Put(r.Context(), alertConstants.FLASH_MSG, "Edit Successful")
 
 	w.Header().Add("HX-Redirect", fmt.Sprintf("/owner/detail/%v", id))
+}
+
+func (handler *OwnerHandler) RemoveOwner(w http.ResponseWriter, r *http.Request) {
+	params := httprouter.ParamsFromContext(r.Context())
+	id, err := strconv.Atoi(params.ByName("id"))
+	if err != nil {
+		handler.ClientError(w, http.StatusBadRequest)
+		return
+	}
+
+	err = handler.Owners.Remove(id)
+	if err != nil {
+		handler.ServerError(w, r, err)
+		return
+	}
+
+	handler.Session.Put(r.Context(), alertConstants.FLASH_MSG, "Owner removed")
+	w.Header().Add("HX-Redirect", "/owner")
 }
