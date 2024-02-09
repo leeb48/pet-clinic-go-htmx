@@ -22,11 +22,23 @@ func Routes(app *app.App) *httprouter.Router {
 	router.Handler(http.MethodGet, "/owner/edit/:id", dynamic.ThenFunc(ownerHandler.ownerEdit))
 	router.Handler(http.MethodPut, "/owner/edit/:id", dynamic.ThenFunc(ownerHandler.ownerEditPut))
 	router.Handler(http.MethodGet, "/owner/detail/:id", dynamic.ThenFunc(ownerHandler.ownerDetail))
-	router.Handler(http.MethodDelete, "/owner/:id", dynamic.ThenFunc(ownerHandler.RemoveOwner))
+	router.Handler(http.MethodDelete, "/owner/:id", dynamic.ThenFunc(ownerHandler.ownerRemove))
 
 	petHandler := NewPetHandler(app)
 	router.Handler(http.MethodGet, "/admin", dynamic.ThenFunc(petHandler.adminPage))
 	router.Handler(http.MethodPost, "/pet/add-pet-type", dynamic.ThenFunc(petHandler.newPetTypePost))
+
+	vetHandler := NewVetHandler(app)
+	router.Handler(http.MethodGet, "/vet", dynamic.ThenFunc(vetHandler.vetList))
+	router.Handler(http.MethodGet, "/vet/create", dynamic.ThenFunc(vetHandler.vetCreate))
+	router.Handler(http.MethodPost, "/vet/create", dynamic.ThenFunc(vetHandler.vetCreatePost))
+	router.Handler(http.MethodGet, "/vet/detail/:id", dynamic.ThenFunc(vetHandler.vetDetail))
+	router.Handler(http.MethodGet, "/vet/edit/:id", dynamic.ThenFunc(vetHandler.vetEdit))
+	router.Handler(http.MethodPut, "/vet/edit/:id", dynamic.ThenFunc(vetHandler.vetEditPut))
+	router.Handler(http.MethodDelete, "/vet/:id", dynamic.ThenFunc(vetHandler.vetRemove))
+
+	errorHandler := NewErrorHandler(app)
+	router.Handler(http.MethodGet, "/server-error", dynamic.ThenFunc(errorHandler.serverError))
 
 	return router
 }

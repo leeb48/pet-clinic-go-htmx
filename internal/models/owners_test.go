@@ -41,7 +41,7 @@ func TestOwnerModelInsert(t *testing.T) {
 				City:      "Las Vegas",
 				State:     "NV",
 			},
-			want: customErrors.CheckConstraintError,
+			want: customErrors.ErrConstraintFail,
 		},
 		{
 			name: "Missing Phone request",
@@ -55,7 +55,7 @@ func TestOwnerModelInsert(t *testing.T) {
 				City:      "Las Vegas",
 				State:     "NV",
 			},
-			want: customErrors.CheckConstraintError,
+			want: customErrors.ErrConstraintFail,
 		},
 	}
 

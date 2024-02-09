@@ -23,7 +23,7 @@ func TestPetTypeModelInsert(t *testing.T) {
 		{
 			name:    "Empty pet type",
 			petType: "",
-			want:    customErrors.CheckConstraintError,
+			want:    customErrors.ErrConstraintFail,
 		},
 		{
 			name:    "Duplicate pet type",

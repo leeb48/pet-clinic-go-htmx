@@ -16,6 +16,7 @@ type App struct {
 	Owners        models.OwnerModelInterface
 	PetTypes      models.PetTypeModelInterface
 	Pets          models.PetModelInterface
+	Vets          models.VetModelInterface
 }
 
 type Config struct {

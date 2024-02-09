@@ -1,0 +1,49 @@
+{{ define "title" }}
+Vet Edit
+{{ end }}
+
+{{ define "main" }}
+<h1>Vet Edit</h1>
+
+{{ with .Form }}
+
+<form hx-put="/vet/edit/{{ .Vet.Id }}" novalidate hx-target="body" hx-target-4*="body" hx-swap="none">
+    <div class="row mb-3">
+        <div class="col">
+            <input type="hidden" name="id" value="{{ .Vet.Id }}">
+            <label for="firstName" class="form-label">First name</label>
+            <input type="text" class="form-control" id="firstName" name="firstName" placeholder="First name"
+                value="{{ .Vet.FirstName }}" required>
+            {{with .FieldErrors.firstName}}
+            <div class="form-text text-danger">{{.}}</div>
+            {{end}}
+        </div>
+        <div class="col">
+            <label for="lastName" class="form-label">Last name</label>
+            <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Last name"
+                value="{{ .Vet.LastName }}" required>
+            {{ with .FieldErrors.lastName }}
+            <div class="form-text text-danger">{{.}}</div>
+            {{end}}
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+{{ end }}
+
+<script>
+    document.addEventListener('htmx:configRequest', (event) => {
+        params = event.detail.parameters
+        params.id = Number(params.id)
+
+        params.vet = {
+            id: params.id,
+            firstName: params.firstName,
+            lastName: params.lastName
+        }
+
+        console.log(params)
+    })
+</script>
+
+{{ end }}

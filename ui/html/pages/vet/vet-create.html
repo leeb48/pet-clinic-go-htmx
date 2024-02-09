@@ -1,0 +1,31 @@
+{{ define "title" }}
+Vet Create
+{{ end }}
+
+{{ define "main" }}
+<h1>Vet Create</h1>
+
+<form hx-post="/vet/create" novalidate hx-target="body" hx-target-4*="body">
+    <div class="row mb-3">
+        <div class="col">
+            <label for="firstName" class="form-label">First name</label>
+            <input type="text" class="form-control" id="firstName" name="firstName" placeholder="First name"
+                value="{{.Form.FirstName}}" required>
+            {{with .Form.FieldErrors.firstName}}
+            <div class="form-text text-danger">{{.}}</div>
+            {{end}}
+        </div>
+        <div class="col">
+            <label for="lastName" class="form-label">Last name</label>
+            <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Last name"
+                value="{{.Form.LastName}}" required>
+            {{with .Form.FieldErrors.lastName}}
+            <div class="form-text text-danger">{{.}}</div>
+            {{end}}
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+
+{{ end }}
