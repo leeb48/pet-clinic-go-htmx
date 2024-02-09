@@ -37,8 +37,5 @@ func Routes(app *app.App) *httprouter.Router {
 	router.Handler(http.MethodPut, "/vet/edit/:id", dynamic.ThenFunc(vetHandler.vetEditPut))
 	router.Handler(http.MethodDelete, "/vet/:id", dynamic.ThenFunc(vetHandler.vetRemove))
 
-	errorHandler := NewErrorHandler(app)
-	router.Handler(http.MethodGet, "/server-error", dynamic.ThenFunc(errorHandler.serverError))
-
 	return router
 }

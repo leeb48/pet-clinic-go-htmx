@@ -13,7 +13,8 @@ func (app *App) ServerError(w http.ResponseWriter, r *http.Request, err error) {
 	)
 
 	app.Logger.Error(err.Error(), "method", method, "uri", uri, "trace", trace)
-	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+	data := app.NewTemplateData(r)
+	app.Render(w, r, http.StatusInternalServerError, "server-error.html", data)
 }
 
 func (app *App) ClientError(w http.ResponseWriter, status int) {
