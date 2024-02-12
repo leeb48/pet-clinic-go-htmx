@@ -65,7 +65,7 @@ func (handler *VetHandler) vetDetail(w http.ResponseWriter, r *http.Request) {
 	params := httprouter.ParamsFromContext(r.Context())
 	vetId, err := strconv.Atoi(params.ByName("id"))
 	if err != nil {
-		handler.ClientError(w, http.StatusBadRequest)
+		handler.ClientError(w, r, http.StatusBadRequest)
 		return
 	}
 

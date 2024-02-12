@@ -5,6 +5,12 @@ import (
 	"runtime/debug"
 )
 
+type errorForm struct {
+	ErrorMsg   string
+	StatusText string
+	StatusCode int
+}
+
 func (app *App) ServerError(w http.ResponseWriter, r *http.Request, err error) {
 	var (
 		method = r.Method
@@ -14,16 +20,22 @@ func (app *App) ServerError(w http.ResponseWriter, r *http.Request, err error) {
 
 	app.Logger.Error(err.Error(), "method", method, "uri", uri, "trace", trace)
 	data := app.NewTemplateData(r)
+	data.Form = &errorForm{
+		ErrorMsg: err.Error(),
+	}
 	app.Render(w, r, http.StatusInternalServerError, "server-error.html", data)
 }
 
-func (app *App) ClientError(w http.ResponseWriter, status int) {
-	statusText := http.StatusText(status)
+func (app *App) ClientError(w http.ResponseWriter, r *http.Request, statusCode int) {
+	statusText := http.StatusText(statusCode)
 
-	app.Logger.Error("clientError", statusText, status)
-	http.Error(w, statusText, status)
-}
+	app.Logger.Error("clientError", statusText, statusCode)
 
-func (app *App) NotFound(w http.ResponseWriter) {
-	app.ClientError(w, http.StatusNotFound)
+	data := app.NewTemplateData(r)
+	data.Form = &errorForm{
+		StatusText: statusText,
+		StatusCode: statusCode,
+	}
+
+	app.Render(w, r, http.StatusInternalServerError, "client-error.html", data)
 }
