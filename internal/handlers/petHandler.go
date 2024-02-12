@@ -36,7 +36,7 @@ func (handler *PetHandler) newPetTypePost(w http.ResponseWriter, r *http.Request
 	var form newPetTypeForm
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
-		handler.ClientError(w, http.StatusBadRequest)
+		handler.ClientError(w, r, http.StatusBadRequest)
 		return
 	}
 

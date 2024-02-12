@@ -32,7 +32,7 @@ func TestPetModelInsert(t *testing.T) {
 				PetTypeId: 1,
 				OwnerId:   1,
 			},
-			want: customErrors.CheckConstraintError,
+			want: customErrors.ErrConstraintFail,
 		},
 	}
 

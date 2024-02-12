@@ -1,0 +1,59 @@
+{{ define "title" }}
+Vet Detail
+{{ end }}
+
+{{ define "main" }}
+
+<h1>Vet Detail</h1>
+
+{{with .Form }}
+
+<section style="background-color: #eee;">
+    <div class="container py-5">
+
+        <div class="row">
+            <div class="col-lg-4">
+                <div class="card mb-4">
+                    <div class="card-body text-center">
+                        <h5 class="my-3">{{ .LastName }}, {{ .FirstName }}</h5>
+                        <div class="d-flex justify-content-center mb-2">
+                            <a href="/vet/edit/{{ .Id }}" type="button" class="btn btn-primary ms-2">Edit</a>
+                            <button type="button" class="btn btn-outline-danger ms-2" data-bs-toggle="modal"
+                                data-bs-target="#removeVetModal">Remove</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-body">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+</section>
+
+<!-- Modal -->
+<div class="modal fade" id="removeVetModal" tabindex="-1" aria-labelledby="removeVetModal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="removeVetModal">Remove Vet</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Please confirm to remove the vet.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-outline-danger" hx-delete="/vet/{{ .Id }}">Remove</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{ end }}
+
+{{ end }}

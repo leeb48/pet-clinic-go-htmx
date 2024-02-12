@@ -2,10 +2,8 @@ package models
 
 import (
 	"database/sql"
-	"errors"
 	"time"
 
-	"github.com/go-sql-driver/mysql"
 	"pet-clinic.bonglee.com/internal/models/customErrors"
 )
 
@@ -43,13 +41,7 @@ func (model *OwnerModel) Insert(firstName, lastName, addr, state, city, phone, e
 
 	result, err := model.DB.Exec(stmt, firstName, lastName, addr, state, city, phone, email, birthdate)
 	if err != nil {
-		var mySqlError *mysql.MySQLError
-		if errors.As(err, &mySqlError) {
-			if mySqlError.Number == customErrors.MY_SQL_CONSTRAINT_CODE {
-				return 0, customErrors.CheckConstraintError
-			}
-		}
-		return 0, err
+		return 0, customErrors.HandleMySqlError(err)
 	}
 
 	ownerId, err := result.LastInsertId()

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/julienschmidt/httprouter"
 	"pet-clinic.bonglee.com/internal/app"
@@ -26,7 +25,7 @@ func NewOwnerHandler(app *app.App) *OwnerHandler {
 }
 
 func (handler *OwnerHandler) home(w http.ResponseWriter, r *http.Request) {
-	data := app.TemplateData{}
+	data := handler.NewTemplateData(r)
 	handler.Render(w, r, http.StatusOK, "home.html", data)
 }
 
@@ -36,33 +35,19 @@ type ownerListForm struct {
 }
 
 func (handler *OwnerHandler) ownerList(w http.ResponseWriter, r *http.Request) {
-
-	pageSize := r.URL.Query().Get("pageSize")
-	if strings.TrimSpace(pageSize) == "" {
-		pageSize = "10"
-	}
-	pageSizeInt, err := strconv.Atoi(pageSize)
-	if err != nil {
-		handler.ClientError(w, http.StatusBadRequest)
-	}
-
-	page := r.URL.Query().Get("page")
-	if strings.TrimSpace(page) == "" {
-		page = "1"
-	}
-	pageInt, err := strconv.Atoi(page)
-	if err != nil {
-		handler.ClientError(w, http.StatusBadRequest)
-	}
+	pageSizeInt := atoiWithDefault(r.URL.Query().Get("pageSize"), 10)
+	pageInt := atoiWithDefault(r.URL.Query().Get("pageSize"), 1)
 
 	pageLen, err := handler.Owners.GetOwnersPageLen(pageSizeInt)
 	if err != nil {
 		handler.ServerError(w, r, err)
+		return
 	}
 
 	owners, err := handler.Owners.GetOwners(pageInt, pageSizeInt)
 	if err != nil {
 		handler.ServerError(w, r, err)
+		return
 	}
 
 	data := handler.NewTemplateData(r)
@@ -73,7 +58,7 @@ func (handler *OwnerHandler) ownerList(w http.ResponseWriter, r *http.Request) {
 	handler.Render(w, r, http.StatusOK, "owner-list.html", data)
 }
 
-type newOwnerForm struct {
+type createOwnerForm struct {
 	FirstName           string             `json:"firstName"`
 	LastName            string             `json:"lastName"`
 	Address             string             `json:"address"`
@@ -96,7 +81,7 @@ func (handler *OwnerHandler) ownerCreate(w http.ResponseWriter, r *http.Request)
 	}
 
 	data := handler.NewTemplateData(r)
-	data.Form = newOwnerForm{
+	data.Form = createOwnerForm{
 		ValidPetTypes: petTypes,
 	}
 
@@ -104,7 +89,7 @@ func (handler *OwnerHandler) ownerCreate(w http.ResponseWriter, r *http.Request)
 }
 
 func (handler *OwnerHandler) ownerCreatePost(w http.ResponseWriter, r *http.Request) {
-	var form newOwnerForm
+	var form createOwnerForm
 
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
@@ -172,16 +157,19 @@ func (handler *OwnerHandler) ownerDetail(w http.ResponseWriter, r *http.Request)
 	id, err := strconv.Atoi(params.ByName("id"))
 	if err != nil {
 		handler.ServerError(w, r, err)
+		return
 	}
 
 	owner, err := handler.Owners.GetOwnerById(id)
 	if err != nil {
 		handler.ServerError(w, r, err)
+		return
 	}
 
 	pets, err := handler.Pets.GetPetsByOwnerId(owner.Id)
 	if err != nil {
 		handler.ServerError(w, r, err)
+		return
 	}
 
 	data := handler.NewTemplateData(r)
@@ -212,24 +200,25 @@ type editOwnerForm struct {
 func (handler *OwnerHandler) ownerEdit(w http.ResponseWriter, r *http.Request) {
 
 	params := httprouter.ParamsFromContext(r.Context())
-	id, err := strconv.Atoi(params.ByName("id"))
-	if err != nil {
-		handler.ServerError(w, r, err)
-	}
+
+	id := atoiWithDefault(params.ByName("id"), 0)
 
 	owner, err := handler.Owners.GetOwnerById(id)
 	if err != nil {
 		handler.ServerError(w, r, err)
+		return
 	}
 
 	validPetTypes, err := handler.PetTypes.GetAll()
 	if err != nil {
 		handler.ServerError(w, r, err)
+		return
 	}
 
 	pets, err := handler.Pets.GetPetsByOwnerId(id)
 	if err != nil {
 		handler.ServerError(w, r, err)
+		return
 	}
 
 	data := handler.NewTemplateData(r)
@@ -252,17 +241,14 @@ func (handler *OwnerHandler) ownerEdit(w http.ResponseWriter, r *http.Request) {
 
 func (handler *OwnerHandler) ownerEditPut(w http.ResponseWriter, r *http.Request) {
 	params := httprouter.ParamsFromContext(r.Context())
-	id, err := strconv.Atoi(params.ByName("id"))
-	if err != nil {
-		handler.ClientError(w, http.StatusBadRequest)
-		return
-	}
+
+	id := atoiWithDefault(params.ByName("id"), 0)
 
 	var form editOwnerForm
 
-	err = json.NewDecoder(r.Body).Decode(&form)
+	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
-		handler.Logger.Error(err.Error())
+		handler.ServerError(w, r, err)
 		return
 	}
 
@@ -328,16 +314,12 @@ func (handler *OwnerHandler) ownerEditPut(w http.ResponseWriter, r *http.Request
 	w.Header().Add("HX-Redirect", fmt.Sprintf("/owner/detail/%v", id))
 }
 
-func (handler *OwnerHandler) RemoveOwner(w http.ResponseWriter, r *http.Request) {
+func (handler *OwnerHandler) ownerRemove(w http.ResponseWriter, r *http.Request) {
 	params := httprouter.ParamsFromContext(r.Context())
-	id, err := strconv.Atoi(params.ByName("id"))
-	if err != nil {
-		handler.ClientError(w, http.StatusBadRequest)
-		return
-	}
+	id := atoiWithDefault(params.ByName("id"), 0)
 
-	err = handler.Owners.Remove(id)
-	if err != nil {
+	err := handler.Owners.Remove(id)
+	if err != nil || id == 0 {
 		handler.ServerError(w, r, err)
 		return
 	}
