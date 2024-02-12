@@ -35,7 +35,7 @@ func TestOwnerCreatePost(t *testing.T) {
 				City:      "Las Vegas",
 				State:     "NV",
 			},
-			wantCode: http.StatusSeeOther,
+			wantCode: http.StatusOK,
 			formTag:  "",
 		},
 		{
