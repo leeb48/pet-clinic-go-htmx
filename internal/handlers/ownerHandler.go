@@ -59,15 +59,8 @@ func (handler *OwnerHandler) ownerList(w http.ResponseWriter, r *http.Request) {
 }
 
 type createOwnerForm struct {
-	FirstName           string             `json:"firstName"`
-	LastName            string             `json:"lastName"`
-	Address             string             `json:"address"`
-	State               string             `json:"state"`
-	City                string             `json:"city"`
-	Phone               string             `json:"phone"`
-	Email               string             `json:"email"`
-	Birthdate           string             `json:"birthdate"`
-	Pets                []models.PetDetail `json:"pets"`
+	Owner               models.OwnerCreateDto `json:"owner"`
+	Pets                []models.PetDetail    `json:"pets"`
 	ValidPetTypes       []string
 	validator.Validator `form:"-"`
 }
@@ -97,15 +90,17 @@ func (handler *OwnerHandler) ownerCreatePost(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	form.Validator.CheckField(validator.NotBlank(form.FirstName), "firstName", "First name cannot be empty")
-	form.Validator.CheckField(validator.NotBlank(form.LastName), "lastName", "Last name cannot be empty")
-	form.Validator.CheckField(validator.NotBlank(form.Address), "address", "Address cannot be empty")
-	form.Validator.CheckField(validator.NotBlank(form.State), "state", "State cannot be empty")
-	form.Validator.CheckField(validator.NotBlank(form.City), "city", "City cannot be empty")
-	form.Validator.CheckField(validator.NotBlank(form.Phone), "phone", "Phone cannot be empty")
-	form.Validator.CheckField(validator.NotBlank(form.Email), "email", "Email cannot be empty")
-	form.Validator.CheckField(validator.Matches(form.Email, validator.EmailRX), "email", "Email invalid")
-	form.Validator.CheckField(validator.NotBlank(form.Birthdate), "birthdate", "Birthdate cannot be empty")
+	owner := form.Owner
+
+	form.Validator.CheckField(validator.NotBlank(owner.FirstName), "firstName", "First name cannot be empty")
+	form.Validator.CheckField(validator.NotBlank(owner.LastName), "lastName", "Last name cannot be empty")
+	form.Validator.CheckField(validator.NotBlank(owner.Address), "address", "Address cannot be empty")
+	form.Validator.CheckField(validator.NotBlank(owner.State), "state", "State cannot be empty")
+	form.Validator.CheckField(validator.NotBlank(owner.City), "city", "City cannot be empty")
+	form.Validator.CheckField(validator.NotBlank(owner.Phone), "phone", "Phone cannot be empty")
+	form.Validator.CheckField(validator.NotBlank(owner.Email), "email", "Email cannot be empty")
+	form.Validator.CheckField(validator.Matches(owner.Email, validator.EmailRX), "email", "Email invalid")
+	form.Validator.CheckField(validator.NotBlank(owner.Birthdate), "birthdate", "Birthdate cannot be empty")
 
 	if !form.Validator.Valid() {
 
@@ -115,7 +110,9 @@ func (handler *OwnerHandler) ownerCreatePost(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	ownerId, err := handler.Owners.Insert(form.FirstName, form.LastName, form.Address, form.State, form.City, form.Phone, form.Email, form.Birthdate)
+	ownerId, err := handler.Owners.Insert(owner.FirstName, owner.LastName, owner.Address, owner.State, owner.City,
+		owner.Phone, owner.Email, owner.Birthdate)
+
 	if err != nil {
 
 		handler.Logger.Error(err.Error())
