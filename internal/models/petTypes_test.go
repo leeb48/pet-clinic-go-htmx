@@ -17,7 +17,7 @@ func TestPetTypeModelInsert(t *testing.T) {
 	}{
 		{
 			name:    "Valid pet type",
-			petType: "CAT",
+			petType: "FISH",
 			want:    nil,
 		},
 		{
@@ -55,6 +55,6 @@ func TestPetTypeGetAll(t *testing.T) {
 
 		assert.NilError(t, err)
 
-		assert.Equal(t, len(petTypes), 1)
+		assert.Equal(t, len(petTypes), 2)
 	})
 }

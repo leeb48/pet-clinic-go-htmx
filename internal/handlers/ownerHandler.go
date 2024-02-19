@@ -181,7 +181,7 @@ func (handler *OwnerHandler) ownerDetail(w http.ResponseWriter, r *http.Request)
 	handler.Render(w, r, http.StatusOK, "owner-detail.html", data)
 }
 
-type editOwnerForm struct {
+type EditOwnerForm struct {
 	Id                  int
 	FirstName           string             `json:"firstName"`
 	LastName            string             `json:"lastName"`
@@ -222,7 +222,7 @@ func (handler *OwnerHandler) ownerEdit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := handler.NewTemplateData(r)
-	data.Form = editOwnerForm{
+	data.Form = EditOwnerForm{
 		Id:            id,
 		FirstName:     owner.FirstName,
 		LastName:      owner.LastName,
@@ -244,7 +244,7 @@ func (handler *OwnerHandler) ownerEditPut(w http.ResponseWriter, r *http.Request
 
 	id := atoiWithDefault(params.ByName("id"), 0)
 
-	var form editOwnerForm
+	var form EditOwnerForm
 
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
@@ -318,7 +318,7 @@ func (handler *OwnerHandler) ownerRemove(w http.ResponseWriter, r *http.Request)
 	params := httprouter.ParamsFromContext(r.Context())
 	id := atoiWithDefault(params.ByName("id"), 0)
 
-	err := handler.Owners.Remove(id)
+	err := handler.Owners.RemoveOwner(id)
 	if err != nil || id == 0 {
 		handler.ServerError(w, r, err)
 		return

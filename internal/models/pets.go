@@ -48,6 +48,23 @@ func (model *PetModel) Insert(name string, birthdate time.Time, petTypeId, owner
 	return nil
 }
 
+func (model *PetModel) GetById(id int) (Pet, error) {
+	pet := Pet{}
+
+	stmt := `
+		SELECT id, name, birthdate, petTypeId
+		FROM pets
+		WHERE id = ?
+	`
+
+	err := model.DB.QueryRow(stmt, id).Scan(&pet.Id, &pet.Name, &pet.Birthdate, &pet.PetTypeId)
+	if err != nil {
+		return pet, err
+	}
+
+	return pet, nil
+}
+
 func (model *PetModel) GetPetsByOwnerId(ownerId int) ([]PetDetail, error) {
 
 	petDetails := []PetDetail{}
@@ -95,7 +112,7 @@ func (model *PetModel) Update(id int, name string, birthdate time.Time, petTypeI
 		SET
 			name = COALESCE(NULLIF(?, ''), name),
 			birthdate = COALESCE(NULLIF(?, ''), birthdate),
-			petTypeId = COALESCE(NULLIF(?, ''), petTypeId),
+			petTypeId = COALESCE(NULLIF(?, 0), petTypeId),
 			modifiedDate = UTC_TIMESTAMP()
 		WHERE
 			id = ?;

@@ -26,7 +26,7 @@ type OwnerModelInterface interface {
 	GetOwners(page, pageSize int) ([]Owner, error)
 	GetOwnerById(id int) (Owner, error)
 	UpdateOwner(id int, firstName, lastName, addr, state, city, phone, email, birthdate string) error
-	Remove(id int) error
+	RemoveOwner(id int) error
 }
 
 type OwnerModel struct {
@@ -150,7 +150,7 @@ func (model *OwnerModel) UpdateOwner(id int, firstName, lastName, addr, state, c
 	return nil
 }
 
-func (model *OwnerModel) Remove(id int) error {
+func (model *OwnerModel) RemoveOwner(id int) error {
 
 	stmt := `
 		DELETE FROM owners WHERE id = ?

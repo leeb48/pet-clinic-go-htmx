@@ -73,4 +73,62 @@ func (ts *TestServer) PostReq(t *testing.T, urlPath string, json []byte) (int, h
 	return rs.StatusCode, rs.Header, string(body)
 }
 
+func (ts *TestServer) GetReq(t *testing.T, urlPath string) (int, http.Header, string) {
+	rs, err := ts.Client().Get(ts.URL + urlPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer rs.Body.Close()
+	body, err := io.ReadAll(rs.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return rs.StatusCode, rs.Header, string(body)
+}
+
+func (ts *TestServer) PutReq(t *testing.T, urlPath string, json []byte) (int, http.Header, string) {
+	req, err := http.NewRequest(http.MethodPut, ts.URL+urlPath, bytes.NewBuffer(json))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rs, err := ts.Client().Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer rs.Body.Close()
+
+	body, err := io.ReadAll(rs.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return rs.StatusCode, rs.Header, string(body)
+}
+
+func (ts *TestServer) DeleteReq(t *testing.T, urlPath string) (int, http.Header, string) {
+	req, err := http.NewRequest(http.MethodDelete, ts.URL+urlPath, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rs, err := ts.Client().Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer rs.Body.Close()
+
+	body, err := io.ReadAll(rs.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return rs.StatusCode, rs.Header, string(body)
+
+}
+
 var GetFormTextDangerHtml = regexp.MustCompile(`<div class="form-text text-danger">(.*) `)
