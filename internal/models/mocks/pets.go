@@ -26,6 +26,12 @@ func (model *PetModel) GetPetsByOwnerId(ownerId int) ([]models.PetDetail, error)
 
 func (model *PetModel) Remove(id int) error {
 
+	for idx, pet := range MockPets {
+		if pet.Id == id {
+			MockPets = append(MockPets[:idx], MockPets[idx+1:]...)
+		}
+	}
+
 	return nil
 }
 

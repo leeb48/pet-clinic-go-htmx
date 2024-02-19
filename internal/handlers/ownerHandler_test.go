@@ -240,6 +240,26 @@ func TestOwnerEditPut(t *testing.T) {
 			petCount:       len(mocks.MockPets),
 			petUpdateCount: 1,
 		},
+
+		{
+			name:     "Valid owner edit remove pets",
+			urlPath:  "/owner/edit/1",
+			wantCode: http.StatusOK,
+			ownerUpdate: EditOwnerForm{
+				Id:           1,
+				FirstName:    "Bong",
+				LastName:     "Lee",
+				Email:        "test@test.com",
+				Phone:        "2223334444",
+				Birthdate:    "2018-05-05",
+				Address:      "1234 S Street",
+				City:         "Las Vegas",
+				State:        "NV",
+				Pets:         []models.PetDetail{},
+				DeletePetIds: []int{1},
+			},
+			petCount: len(mocks.MockPets) - 1,
+		},
 	}
 
 	for _, test := range tests {
@@ -259,6 +279,43 @@ func TestOwnerEditPut(t *testing.T) {
 			assert.Equal(t, len(mocks.MockPets), test.petCount)
 			assert.Equal(t, mocks.PetUpdateCount, test.petUpdateCount)
 
+		})
+	}
+}
+
+func TestOwnerRemove(t *testing.T) {
+	testApp := app.NewTestApp(t)
+	testServer := app.NewTestServer(t, Routes(testApp))
+
+	tests := []struct {
+		name       string
+		urlPath    string
+		wantCode   int
+		ownerCount int
+	}{
+		{
+			name:       "Valid owner remove",
+			urlPath:    "/owner/1",
+			wantCode:   http.StatusOK,
+			ownerCount: len(mocks.MockOwners) - 1,
+		},
+
+		{
+			name:       "Non-existent owner remove",
+			urlPath:    "/owner/3",
+			wantCode:   http.StatusOK,
+			ownerCount: len(mocks.MockOwners),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mocks.MockOwners = mocks.ResetMockOwners()
+
+			statusCode, _, _ := testServer.DeleteReq(t, test.urlPath)
+
+			assert.Equal(t, statusCode, test.wantCode)
+			assert.Equal(t, len(mocks.MockOwners), test.ownerCount)
 		})
 	}
 }

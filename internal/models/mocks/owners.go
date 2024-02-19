@@ -56,7 +56,13 @@ func (model *OwnerModel) UpdateOwner(id int, firstName, lastName, addr, state, c
 	return nil
 }
 
-func (model *OwnerModel) Remove(id int) error {
+func (model *OwnerModel) RemoveOwner(id int) error {
+
+	for idx, owner := range MockOwners {
+		if owner.Id == id {
+			MockOwners = append(MockOwners[:idx], MockOwners[idx+1:]...)
+		}
+	}
 
 	return nil
 }

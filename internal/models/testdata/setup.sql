@@ -54,6 +54,28 @@ VALUES
         'test@test.com',
         '1991-12-12',
         UTC_TIMESTAMP()
+    ),
+    (
+        'Megan',
+        'Wu',
+        '123 St',
+        'NV',
+        'Las Vegas',
+        '1112223333',
+        'test@test.com',
+        '1991-12-12',
+        UTC_TIMESTAMP()
+    ),
+    (
+        'Acorn',
+        'Wu',
+        '123 St',
+        'NV',
+        'Las Vegas',
+        '1112223333',
+        'test@test.com',
+        '1991-12-12',
+        UTC_TIMESTAMP()
     );
 
 INSERT INTO

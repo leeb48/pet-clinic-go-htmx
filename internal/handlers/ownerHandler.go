@@ -318,7 +318,7 @@ func (handler *OwnerHandler) ownerRemove(w http.ResponseWriter, r *http.Request)
 	params := httprouter.ParamsFromContext(r.Context())
 	id := atoiWithDefault(params.ByName("id"), 0)
 
-	err := handler.Owners.Remove(id)
+	err := handler.Owners.RemoveOwner(id)
 	if err != nil || id == 0 {
 		handler.ServerError(w, r, err)
 		return
