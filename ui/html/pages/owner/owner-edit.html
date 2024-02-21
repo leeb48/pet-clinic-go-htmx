@@ -17,7 +17,7 @@ Owner Edit
         <div class="col">
             <label for="firstName" class="form-label">First name</label>
             <input type="text" class="form-control" id="firstName" name="firstName" placeholder="First name"
-                value="{{.Form.FirstName}}" required>
+                value="{{.Form.Owner.FirstName}}" required>
             {{with .Form.FieldErrors.firstName}}
             <div class="form-text text-danger">{{.}}</div>
             {{end}}
@@ -25,7 +25,7 @@ Owner Edit
         <div class="col">
             <label for="lastName" class="form-label">Last name</label>
             <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Last name"
-                value="{{.Form.LastName}}" required>
+                value="{{.Form.Owner.LastName}}" required>
             {{with .Form.FieldErrors.lastName}}
             <div class="form-text text-danger">{{.}}</div>
             {{end}}
@@ -34,8 +34,8 @@ Owner Edit
     <div class="row mb-3">
         <div class="col">
             <label for="email" class="form-label">Email address</label>
-            <input class="form-control" id="email" name="email" placeholder="name@example.com" value="{{.Form.Email}}"
-                required>
+            <input class="form-control" id="email" name="email" placeholder="name@example.com"
+                value="{{.Form.Owner.Email}}" required>
             {{with .Form.FieldErrors.email}}
             <div class="form-text text-danger">{{.}}</div>
             {{end}}
@@ -43,7 +43,7 @@ Owner Edit
         <div class="col">
             <label for="phone" class="form-label">Phone</label>
             <input type="tel" class="form-control" id="phone" name="phone" placeholder="#" minlength="10" maxlength="10"
-                value="{{.Form.Phone}}" required>
+                value="{{.Form.Owner.Phone}}" required>
             {{with .Form.FieldErrors.phone}}
             <div class="form-text text-danger">{{.}}</div>
             {{end}}
@@ -52,7 +52,8 @@ Owner Edit
 
     <div class="mb-3">
         <label for="birthdate" class="form-label">Birthdate</label>
-        <input type="date" class="form-control" id="birthdate" name="birthdate" value="{{.Form.Birthdate}}" required>
+        <input type="date" class="form-control" id="birthdate" name="birthdate" value="{{.Form.Owner.Birthdate}}"
+            required>
         {{with .Form.FieldErrors.birthdate}}
         <div class="form-text text-danger">{{.}}</div>
         {{end}}
@@ -61,7 +62,7 @@ Owner Edit
     <div class="mb-3">
         <label for="address" class="form-label">Address</label>
         <input type="text" class="form-control" id="address" name='address' placeholder="Stree Address"
-            value="{{.Form.Address}}" required>
+            value="{{.Form.Owner.Address}}" required>
         {{with .Form.FieldErrors.address}}
         <div class="form-text text-danger">{{.}}</div>
         {{end}}
@@ -69,7 +70,7 @@ Owner Edit
     <div class="row mb-3">
         <div class="col">
             <label for="city" class="form-label">City</label>
-            <input type="text" class="form-control" id="city" name="city" value="{{.Form.City}}" required>
+            <input type="text" class="form-control" id="city" name="city" value="{{.Form.Owner.City}}" required>
             {{with .Form.FieldErrors.city}}
             <div class="form-text text-danger">{{.}}</div>
             {{end}}
@@ -203,7 +204,7 @@ Owner Edit
 
             <tr>
                 <th scope="row">
-                    <input type="hidden" name="petId" value="{{ .Id }}" readonly>
+                    <input type="hidden" name="petId" value="0" readonly>
                     <input type="text" class="form-control-plaintext" id="pet-name-input" name="petName"
                         placeholder="Pet Name" value="{{ .Name }}" readonly>
                 </th>
@@ -232,107 +233,123 @@ Owner Edit
 
 <script>
 
-    htmx.onLoad(function (content) {
-        // pre-select the state during re-render
+    preSelectState()
+
+    function preSelectState() {
         const stateOptions = document
             .getElementById('state')
             .getElementsByTagName('option')
         for (const state of stateOptions) {
-            if (state.value == '{{ .Form.State }}') {
+            if (state.value == '{{ .Form.Owner.State }}') {
                 state.selected = 'selected'
             }
         }
-    })
-
-    function markPetToDelete(event) {
-        const target = event.target
-
-        const row = target.closest('tr')
-        row.classList.toggle('table-danger')
     }
 
-    function formatPetData(params) {
+    if (!window.scriptRendered) {
+        window.scriptRendered = true
 
-        if (!Array.isArray(params['petName'])) {
-            params['petName'] = params['petName'].split()
-            params['petType'] = params['petType'].split()
-            params['petBirthdate'] = params['petBirthdate'].split()
+        function markPetToDelete(event) {
+            const target = event.target
+
+            const row = target.closest('tr')
+            row.classList.toggle('table-danger')
         }
 
-        const pets = []
+        function formatPetData(params) {
 
-        for (let i = 0; i < params['petName']?.length; ++i) {
-            const petId = params['petId'][i]
-            const petName = params['petName'][i]
-            const petType = params['petType'][i]
-            const petBirthdate = params['petBirthdate'][i]
-
-            if (petName == '') continue
-
-            const pet = {
-                id: Number(petId),
-                name: petName,
-                petType: petType,
-                birthdate: new Date(petBirthdate).toISOString(),
+            if (!Array.isArray(params['petName'])) {
+                params['petName'] = params['petName'].split()
+                params['petType'] = params['petType'].split()
+                params['petBirthdate'] = params['petBirthdate'].split()
             }
 
-            pets.push(pet)
+            const pets = []
+
+            for (let i = 0; i < params['petName']?.length; ++i) {
+                const petId = params['petId'][i]
+                const petName = params['petName'][i]
+                const petType = params['petType'][i]
+                const petBirthdate = params['petBirthdate'][i]
+
+                if (petName == '') continue
+
+                const pet = {
+                    id: Number(petId),
+                    name: petName,
+                    petType: petType,
+                    birthdate: new Date(petBirthdate).toISOString(),
+                }
+
+                pets.push(pet)
+            }
+
+            params.pets = pets
         }
 
-        params.pets = pets
-    }
+        function getPetsToDelete(params) {
+            const deletePetIds = []
+            const petDeleteRows = document.querySelectorAll('table tr.table-danger')
+            for (const row of petDeleteRows) {
+                const petId = Number(row.attributes.petId.value)
+                deletePetIds.push(petId)
+            }
 
-    function getPetsToDelete(params) {
-        const deletePetIds = []
-        const petDeleteRows = document.querySelectorAll('table tr.table-danger')
-        for (const row of petDeleteRows) {
-            const petId = Number(row.attributes.petId.value)
-            deletePetIds.push(petId)
+            params.deletePetIds = deletePetIds
         }
 
-        params.deletePetIds = deletePetIds
-    }
+        document.addEventListener('htmx:configRequest', (event) => {
+            params = event.detail.parameters
+            params.id = Number(params.id)
 
-    document.addEventListener('htmx:configRequest', (event) => {
-        params = event.detail.parameters
-        params.id = Number(params.id)
+            formatPetData(params)
+            getPetsToDelete(params)
 
-        formatPetData(params)
-        getPetsToDelete(params)
-    })
+            params.owner = {
+                firstName: params['firstName'],
+                lastName: params['lastName'],
+                address: params['address'],
+                state: params['state'],
+                city: params['city'],
+                phone: params['phone'],
+                email: params['email'],
+                birthdate: params['birthdate'],
+            }
+        })
 
 
-    function addNewPet() {
-        const petNameInput = document.getElementById('pet-name-input')
-        const petTypeInput = document.getElementById('pet-type-input')
-        const petBirthdateInput = document.getElementById('pet-birthdate-input')
+        function addNewPet() {
+            const petNameInput = document.getElementById('pet-name-input')
+            const petTypeInput = document.getElementById('pet-type-input')
+            const petBirthdateInput = document.getElementById('pet-birthdate-input')
 
-        if (!petNameInput.value || !petTypeInput.value || !petBirthdateInput.value) return
+            if (!petNameInput.value || !petTypeInput.value || !petBirthdateInput.value) return
 
-        const petTable = document.getElementById('pet-table')
-        const row = petTable.insertRow()
-        const nameCell = row.insertCell(0)
-        const petTypeCell = row.insertCell(1)
-        const petBirthdateCell = row.insertCell(2)
-        const remove = row.insertCell(3)
+            const petTable = document.getElementById('pet-table')
+            const row = petTable.insertRow()
+            const nameCell = row.insertCell(0)
+            const petTypeCell = row.insertCell(1)
+            const petBirthdateCell = row.insertCell(2)
+            const remove = row.insertCell(3)
 
-        nameCell.innerHTML = `
+            nameCell.innerHTML = `
         <input class="form-control-plaintext" type="hidden" name="petId" readonly>
         <input class="form-control-plaintext" type="text" name="petName" value=${petNameInput.value} readonly>
         `
-        petTypeCell.innerHTML = `<input class="form-control-plaintext" type="text" name="petType" value=${petTypeInput.value} readonly>`
-        petBirthdateCell.innerHTML = `<input class="form-control-plaintext" type="text" name="petBirthdate" value=${petBirthdateInput.value} readonly>`
-        remove.innerHTML = `<button type="button" class="btn btn-outline-danger" onclick="deleteRow(this)">X</button>`
+            petTypeCell.innerHTML = `<input class="form-control-plaintext" type="text" name="petType" value=${petTypeInput.value} readonly>`
+            petBirthdateCell.innerHTML = `<input class="form-control-plaintext" type="text" name="petBirthdate" value=${petBirthdateInput.value} readonly>`
+            remove.innerHTML = `<button type="button" class="btn btn-outline-danger" onclick="deleteRow(this)">X</button>`
 
-        petNameInput.value = ''
-        petTypeInput.value = ''
-        petBirthdateInput.value = ''
+            petNameInput.value = ''
+            petTypeInput.value = ''
+            petBirthdateInput.value = ''
+        }
+
+        function deleteRow(row) {
+            row.parentNode.parentNode.remove()
+        }
     }
 
-    function deleteRow(row) {
-        console.log(row)
-        row.parentNode.parentNode.remove()
-    }
 
 </script>
 

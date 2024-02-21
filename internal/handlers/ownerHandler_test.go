@@ -19,26 +19,29 @@ func TestOwnerCreatePost(t *testing.T) {
 	testServer := app.NewTestServer(t, Routes(testApp))
 
 	tests := []struct {
-		name       string
-		owner      models.Owner
-		urlPath    string
-		ownerCount int
-		wantCode   int
-		formTag    string
+		name            string
+		createOwnerForm CreateOwnerForm
+		urlPath         string
+		ownerCount      int
+		wantCode        int
+		formTag         string
 	}{
 		{
 			name:    "Valid new owner request",
 			urlPath: "/owner/create",
-			owner: models.Owner{
-				FirstName: "Bong",
-				LastName:  "Lee",
-				Email:     "test@test.com",
-				Phone:     "2223334444",
-				Birthdate: time.Now(),
-				Address:   "1234 S Street",
-				City:      "Las Vegas",
-				State:     "NV",
+			createOwnerForm: CreateOwnerForm{
+				Owner: models.OwnerCreateDto{
+					FirstName: "Bong",
+					LastName:  "Lee",
+					Email:     "test@test.com",
+					Phone:     "2223334444",
+					Birthdate: "03-03-1991",
+					Address:   "1234 S Street",
+					City:      "Las Vegas",
+					State:     "NV",
+				},
 			},
+
 			ownerCount: len(mocks.MockOwners) + 1,
 			wantCode:   http.StatusOK,
 			formTag:    "",
@@ -46,15 +49,17 @@ func TestOwnerCreatePost(t *testing.T) {
 		{
 			name:    "Missing FirstName",
 			urlPath: "/owner/create",
-			owner: models.Owner{
-				FirstName: "",
-				LastName:  "Lee",
-				Email:     "test@test.com",
-				Phone:     "2223334444",
-				Birthdate: time.Now(),
-				Address:   "1234 S Street",
-				City:      "Las Vegas",
-				State:     "NV",
+			createOwnerForm: CreateOwnerForm{
+				Owner: models.OwnerCreateDto{
+					FirstName: "",
+					LastName:  "Lee",
+					Email:     "test@test.com",
+					Phone:     "2223334444",
+					Birthdate: "03-03-1991",
+					Address:   "1234 S Street",
+					City:      "Las Vegas",
+					State:     "NV",
+				},
 			},
 			ownerCount: len(mocks.MockOwners),
 			wantCode:   http.StatusUnprocessableEntity,
@@ -63,15 +68,18 @@ func TestOwnerCreatePost(t *testing.T) {
 		{
 			name:    "Owner model error",
 			urlPath: "/owner/create",
-			owner: models.Owner{
-				FirstName: "ownerModelError",
-				LastName:  "Lee",
-				Email:     "test@test.com",
-				Phone:     "2223334444",
-				Birthdate: time.Now(),
-				Address:   "1234 S Street",
-				City:      "Las Vegas",
-				State:     "NV",
+
+			createOwnerForm: CreateOwnerForm{
+				Owner: models.OwnerCreateDto{
+					FirstName: "ownerModelError",
+					LastName:  "Lee",
+					Email:     "test@test.com",
+					Phone:     "2223334444",
+					Birthdate: "03-03-1991",
+					Address:   "1234 S Street",
+					City:      "Las Vegas",
+					State:     "NV",
+				},
 			},
 			ownerCount: len(mocks.MockOwners),
 			wantCode:   http.StatusUnprocessableEntity,
@@ -84,7 +92,7 @@ func TestOwnerCreatePost(t *testing.T) {
 
 			mocks.MockOwners = mocks.ResetMockOwners()
 
-			jsonData, err := json.Marshal(test.owner)
+			jsonData, err := json.Marshal(test.createOwnerForm)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -183,7 +191,7 @@ func TestOwnerEditPut(t *testing.T) {
 		name           string
 		urlPath        string
 		wantCode       int
-		ownerUpdate    EditOwnerForm
+		editOwnerForm  EditOwnerForm
 		petCount       int
 		petUpdateCount int
 	}{
@@ -191,16 +199,18 @@ func TestOwnerEditPut(t *testing.T) {
 			name:     "Valid owner edit (with additional pet)",
 			urlPath:  "/owner/edit/1",
 			wantCode: http.StatusOK,
-			ownerUpdate: EditOwnerForm{
-				Id:        1,
-				FirstName: "Bong",
-				LastName:  "Lee",
-				Email:     "test@test.com",
-				Phone:     "2223334444",
-				Birthdate: "2018-05-05",
-				Address:   "1234 S Street",
-				City:      "Las Vegas",
-				State:     "NV",
+			editOwnerForm: EditOwnerForm{
+				Id: 1,
+				Owner: models.OwnerCreateDto{
+					FirstName: "Bong",
+					LastName:  "Lee",
+					Email:     "test@test.com",
+					Phone:     "2223334444",
+					Birthdate: "2018-05-05",
+					Address:   "1234 S Street",
+					City:      "Las Vegas",
+					State:     "NV",
+				},
 				Pets: []models.PetDetail{
 					{
 						Id:        0,
@@ -218,16 +228,18 @@ func TestOwnerEditPut(t *testing.T) {
 			name:     "Valid owner edit",
 			urlPath:  "/owner/edit/1",
 			wantCode: http.StatusOK,
-			ownerUpdate: EditOwnerForm{
-				Id:        1,
-				FirstName: "Bong",
-				LastName:  "Lee",
-				Email:     "test@test.com",
-				Phone:     "2223334444",
-				Birthdate: "2018-05-05",
-				Address:   "1234 S Street",
-				City:      "Las Vegas",
-				State:     "NV",
+			editOwnerForm: EditOwnerForm{
+				Id: 1,
+				Owner: models.OwnerCreateDto{
+					FirstName: "Bong",
+					LastName:  "Lee",
+					Email:     "test@test.com",
+					Phone:     "2223334444",
+					Birthdate: "2018-05-05",
+					Address:   "1234 S Street",
+					City:      "Las Vegas",
+					State:     "NV",
+				},
 				Pets: []models.PetDetail{
 					{
 						Id:        1,
@@ -245,16 +257,18 @@ func TestOwnerEditPut(t *testing.T) {
 			name:     "Valid owner edit remove pets",
 			urlPath:  "/owner/edit/1",
 			wantCode: http.StatusOK,
-			ownerUpdate: EditOwnerForm{
-				Id:           1,
-				FirstName:    "Bong",
-				LastName:     "Lee",
-				Email:        "test@test.com",
-				Phone:        "2223334444",
-				Birthdate:    "2018-05-05",
-				Address:      "1234 S Street",
-				City:         "Las Vegas",
-				State:        "NV",
+			editOwnerForm: EditOwnerForm{
+				Id: 1,
+				Owner: models.OwnerCreateDto{
+					FirstName: "Bong",
+					LastName:  "Lee",
+					Email:     "test@test.com",
+					Phone:     "2223334444",
+					Birthdate: "2018-05-05",
+					Address:   "1234 S Street",
+					City:      "Las Vegas",
+					State:     "NV",
+				},
 				Pets:         []models.PetDetail{},
 				DeletePetIds: []int{1},
 			},
@@ -268,14 +282,14 @@ func TestOwnerEditPut(t *testing.T) {
 			mocks.MockPets = mocks.ResetMockPets()
 			mocks.PetUpdateCount = 0
 
-			jsonData, err := json.Marshal(test.ownerUpdate)
+			jsonData, err := json.Marshal(test.editOwnerForm)
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			_, header, _ := testServer.PutReq(t, test.urlPath, jsonData)
 
-			assert.Equal(t, header.Get("HX-Redirect"), fmt.Sprintf("/owner/detail/%v", test.ownerUpdate.Id))
+			assert.Equal(t, header.Get("HX-Redirect"), fmt.Sprintf("/owner/detail/%v", test.editOwnerForm.Id))
 			assert.Equal(t, len(mocks.MockPets), test.petCount)
 			assert.Equal(t, mocks.PetUpdateCount, test.petUpdateCount)
 

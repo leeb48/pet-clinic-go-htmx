@@ -20,6 +20,17 @@ type Owner struct {
 	Created   time.Time
 }
 
+type OwnerCreateDto struct {
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	Address   string `json:"address"`
+	State     string `json:"state"`
+	City      string `json:"city"`
+	Phone     string `json:"phone"`
+	Email     string `json:"email"`
+	Birthdate string `json:"birthdate"`
+}
+
 type OwnerModelInterface interface {
 	Insert(firstName, lastName, addr, state, city, phone, email, birthdate string) (int, error)
 	GetOwnersPageLen(pageSize int) (int, error)
