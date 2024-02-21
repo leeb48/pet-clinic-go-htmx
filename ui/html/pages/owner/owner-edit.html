@@ -17,7 +17,7 @@ Owner Edit
         <div class="col">
             <label for="firstName" class="form-label">First name</label>
             <input type="text" class="form-control" id="firstName" name="firstName" placeholder="First name"
-                value="{{.Form.FirstName}}" required>
+                value="{{.Form.Owner.FirstName}}" required>
             {{with .Form.FieldErrors.firstName}}
             <div class="form-text text-danger">{{.}}</div>
             {{end}}
@@ -25,7 +25,7 @@ Owner Edit
         <div class="col">
             <label for="lastName" class="form-label">Last name</label>
             <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Last name"
-                value="{{.Form.LastName}}" required>
+                value="{{.Form.Owner.LastName}}" required>
             {{with .Form.FieldErrors.lastName}}
             <div class="form-text text-danger">{{.}}</div>
             {{end}}
@@ -34,8 +34,8 @@ Owner Edit
     <div class="row mb-3">
         <div class="col">
             <label for="email" class="form-label">Email address</label>
-            <input class="form-control" id="email" name="email" placeholder="name@example.com" value="{{.Form.Email}}"
-                required>
+            <input class="form-control" id="email" name="email" placeholder="name@example.com"
+                value="{{.Form.Owner.Email}}" required>
             {{with .Form.FieldErrors.email}}
             <div class="form-text text-danger">{{.}}</div>
             {{end}}
@@ -43,7 +43,7 @@ Owner Edit
         <div class="col">
             <label for="phone" class="form-label">Phone</label>
             <input type="tel" class="form-control" id="phone" name="phone" placeholder="#" minlength="10" maxlength="10"
-                value="{{.Form.Phone}}" required>
+                value="{{.Form.Owner.Phone}}" required>
             {{with .Form.FieldErrors.phone}}
             <div class="form-text text-danger">{{.}}</div>
             {{end}}
@@ -52,7 +52,8 @@ Owner Edit
 
     <div class="mb-3">
         <label for="birthdate" class="form-label">Birthdate</label>
-        <input type="date" class="form-control" id="birthdate" name="birthdate" value="{{.Form.Birthdate}}" required>
+        <input type="date" class="form-control" id="birthdate" name="birthdate" value="{{.Form.Owner.Birthdate}}"
+            required>
         {{with .Form.FieldErrors.birthdate}}
         <div class="form-text text-danger">{{.}}</div>
         {{end}}
@@ -61,7 +62,7 @@ Owner Edit
     <div class="mb-3">
         <label for="address" class="form-label">Address</label>
         <input type="text" class="form-control" id="address" name='address' placeholder="Stree Address"
-            value="{{.Form.Address}}" required>
+            value="{{.Form.Owner.Address}}" required>
         {{with .Form.FieldErrors.address}}
         <div class="form-text text-danger">{{.}}</div>
         {{end}}
@@ -69,7 +70,7 @@ Owner Edit
     <div class="row mb-3">
         <div class="col">
             <label for="city" class="form-label">City</label>
-            <input type="text" class="form-control" id="city" name="city" value="{{.Form.City}}" required>
+            <input type="text" class="form-control" id="city" name="city" value="{{.Form.Owner.City}}" required>
             {{with .Form.FieldErrors.city}}
             <div class="form-text text-danger">{{.}}</div>
             {{end}}
@@ -203,7 +204,7 @@ Owner Edit
 
             <tr>
                 <th scope="row">
-                    <input type="hidden" name="petId" value="{{ .Id }}" readonly>
+                    <input type="hidden" name="petId" value="0" readonly>
                     <input type="text" class="form-control-plaintext" id="pet-name-input" name="petName"
                         placeholder="Pet Name" value="{{ .Name }}" readonly>
                 </th>
@@ -239,7 +240,7 @@ Owner Edit
             .getElementById('state')
             .getElementsByTagName('option')
         for (const state of stateOptions) {
-            if (state.value == '{{ .Form.State }}') {
+            if (state.value == '{{ .Form.Owner.State }}') {
                 state.selected = 'selected'
             }
         }
@@ -303,6 +304,17 @@ Owner Edit
 
             formatPetData(params)
             getPetsToDelete(params)
+
+            params.owner = {
+                firstName: params['firstName'],
+                lastName: params['lastName'],
+                address: params['address'],
+                state: params['state'],
+                city: params['city'],
+                phone: params['phone'],
+                email: params['email'],
+                birthdate: params['birthdate'],
+            }
         })
 
 
@@ -334,7 +346,6 @@ Owner Edit
         }
 
         function deleteRow(row) {
-            console.log(row)
             row.parentNode.parentNode.remove()
         }
     }

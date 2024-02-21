@@ -58,7 +58,7 @@ func (handler *OwnerHandler) ownerList(w http.ResponseWriter, r *http.Request) {
 	handler.Render(w, r, http.StatusOK, "owner-list.html", data)
 }
 
-type createOwnerForm struct {
+type CreateOwnerForm struct {
 	Owner               models.OwnerCreateDto `json:"owner"`
 	Pets                []models.PetDetail    `json:"pets"`
 	ValidPetTypes       []string
@@ -74,7 +74,7 @@ func (handler *OwnerHandler) ownerCreate(w http.ResponseWriter, r *http.Request)
 	}
 
 	data := handler.NewTemplateData(r)
-	data.Form = createOwnerForm{
+	data.Form = CreateOwnerForm{
 		ValidPetTypes: petTypes,
 	}
 
@@ -82,13 +82,20 @@ func (handler *OwnerHandler) ownerCreate(w http.ResponseWriter, r *http.Request)
 }
 
 func (handler *OwnerHandler) ownerCreatePost(w http.ResponseWriter, r *http.Request) {
-	var form createOwnerForm
+	var form CreateOwnerForm
 
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
 		handler.Logger.Error(err.Error())
 		return
 	}
+
+	petTypes, err := handler.PetTypes.GetAll()
+	if err != nil {
+		handler.ServerError(w, r, err)
+		return
+	}
+	form.ValidPetTypes = petTypes
 
 	owner := form.Owner
 
@@ -180,16 +187,9 @@ func (handler *OwnerHandler) ownerDetail(w http.ResponseWriter, r *http.Request)
 
 type EditOwnerForm struct {
 	Id                  int
-	FirstName           string             `json:"firstName"`
-	LastName            string             `json:"lastName"`
-	Address             string             `json:"address"`
-	State               string             `json:"state"`
-	City                string             `json:"city"`
-	Phone               string             `json:"phone"`
-	Email               string             `json:"email"`
-	Birthdate           string             `json:"birthdate"`
-	Pets                []models.PetDetail `json:"pets"`
-	DeletePetIds        []int              `json:"deletePetIds"`
+	Owner               models.OwnerCreateDto `json:"owner"`
+	Pets                []models.PetDetail    `json:"pets"`
+	DeletePetIds        []int                 `json:"deletePetIds"`
 	ValidPetTypes       []string
 	validator.Validator `form:"-"`
 }
@@ -220,15 +220,17 @@ func (handler *OwnerHandler) ownerEdit(w http.ResponseWriter, r *http.Request) {
 
 	data := handler.NewTemplateData(r)
 	data.Form = EditOwnerForm{
-		Id:            id,
-		FirstName:     owner.FirstName,
-		LastName:      owner.LastName,
-		Email:         owner.Email,
-		Phone:         owner.Phone,
-		Birthdate:     owner.Birthdate.Format(constants.YYYY_MM_DD),
-		Address:       owner.Address,
-		City:          owner.City,
-		State:         owner.State,
+		Id: id,
+		Owner: models.OwnerCreateDto{
+			FirstName: owner.FirstName,
+			LastName:  owner.LastName,
+			Email:     owner.Email,
+			Phone:     owner.Phone,
+			Birthdate: owner.Birthdate.Format(constants.YYYY_MM_DD),
+			Address:   owner.Address,
+			City:      owner.City,
+			State:     owner.State,
+		},
 		Pets:          pets,
 		ValidPetTypes: validPetTypes,
 	}
@@ -249,15 +251,17 @@ func (handler *OwnerHandler) ownerEditPut(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	form.Validator.CheckField(validator.NotBlank(form.FirstName), "firstName", "First name cannot be empty")
-	form.Validator.CheckField(validator.NotBlank(form.LastName), "lastName", "Last name cannot be empty")
-	form.Validator.CheckField(validator.NotBlank(form.Address), "address", "Address cannot be empty")
-	form.Validator.CheckField(validator.NotBlank(form.State), "state", "State cannot be empty")
-	form.Validator.CheckField(validator.NotBlank(form.City), "city", "City cannot be empty")
-	form.Validator.CheckField(validator.NotBlank(form.Phone), "phone", "Phone cannot be empty")
-	form.Validator.CheckField(validator.NotBlank(form.Email), "email", "Email cannot be empty")
-	form.Validator.CheckField(validator.Matches(form.Email, validator.EmailRX), "email", "Email invalid")
-	form.Validator.CheckField(validator.NotBlank(form.Birthdate), "birthdate", "Birthdate cannot be empty")
+	owner := form.Owner
+
+	form.Validator.CheckField(validator.NotBlank(owner.FirstName), "firstName", "First name cannot be empty")
+	form.Validator.CheckField(validator.NotBlank(owner.LastName), "lastName", "Last name cannot be empty")
+	form.Validator.CheckField(validator.NotBlank(owner.Address), "address", "Address cannot be empty")
+	form.Validator.CheckField(validator.NotBlank(owner.State), "state", "State cannot be empty")
+	form.Validator.CheckField(validator.NotBlank(owner.City), "city", "City cannot be empty")
+	form.Validator.CheckField(validator.NotBlank(owner.Phone), "phone", "Phone cannot be empty")
+	form.Validator.CheckField(validator.NotBlank(owner.Email), "email", "Email cannot be empty")
+	form.Validator.CheckField(validator.Matches(owner.Email, validator.EmailRX), "email", "Email invalid")
+	form.Validator.CheckField(validator.NotBlank(owner.Birthdate), "birthdate", "Birthdate cannot be empty")
 
 	if !form.Validator.Valid() {
 
@@ -274,7 +278,9 @@ func (handler *OwnerHandler) ownerEditPut(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err = handler.Owners.UpdateOwner(id, form.FirstName, form.LastName, form.Address, form.State, form.City, form.Phone, form.Email, form.Birthdate)
+	err = handler.Owners.UpdateOwner(id, owner.FirstName, owner.LastName, owner.Address, owner.State,
+		owner.City, owner.Phone, owner.Email, owner.Birthdate)
+
 	if err != nil {
 		handler.ServerError(w, r, err)
 		return
