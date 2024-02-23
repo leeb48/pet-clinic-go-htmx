@@ -3,10 +3,12 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
 	"pet-clinic.bonglee.com/internal/app"
+	"pet-clinic.bonglee.com/internal/models"
 	"pet-clinic.bonglee.com/internal/models/customErrors"
 	"pet-clinic.bonglee.com/internal/validator"
 )
@@ -68,4 +70,30 @@ func (handler *PetHandler) newPetTypePost(w http.ResponseWriter, r *http.Request
 	}
 
 	http.Redirect(w, r, "/admin", http.StatusSeeOther)
+}
+
+type petSearchForm struct {
+	models.PetDetail
+}
+
+func (handler *PetHandler) getPetsByNameAndDob(w http.ResponseWriter, r *http.Request) {
+	var form petSearchForm
+
+	err := json.NewDecoder(r.Body).Decode(&form)
+	if err != nil {
+		fmt.Println(err.Error())
+		handler.ClientError(w, r, http.StatusBadRequest)
+		return
+	}
+
+	pets, err := handler.Pets.GetPetsByNameAndDob(form.Name, form.Birthdate)
+	if err != nil {
+		handler.ServerError(w, r, err)
+		return
+	}
+
+	data := handler.NewTemplateData(r)
+	data.Form = pets
+
+	handler.RenderPartial(w, r, http.StatusOK, "pet-list.html", data)
 }

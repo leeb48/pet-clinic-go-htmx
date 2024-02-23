@@ -37,5 +37,5 @@ func (app *App) ClientError(w http.ResponseWriter, r *http.Request, statusCode i
 		StatusCode: statusCode,
 	}
 
-	app.Render(w, r, http.StatusInternalServerError, "client-error.html", data)
+	app.Render(w, r, http.StatusBadRequest, "client-error.html", data)
 }

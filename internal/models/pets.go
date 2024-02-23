@@ -20,6 +20,7 @@ type PetDetail struct {
 	Name      string    `json:"name"`
 	Birthdate time.Time `json:"birthdate"`
 	PetType   string    `json:"petType"`
+	OwnerId   int
 }
 
 type PetModelInterface interface {
@@ -27,6 +28,7 @@ type PetModelInterface interface {
 	GetPetsByOwnerId(ownerId int) ([]PetDetail, error)
 	Remove(id int) error
 	Update(id int, name string, birthdate time.Time, petTypeId int) error
+	GetPetsByNameAndDob(name string, birthdate time.Time) ([]PetDetail, error)
 }
 
 type PetModel struct {
@@ -124,4 +126,30 @@ func (model *PetModel) Update(id int, name string, birthdate time.Time, petTypeI
 	}
 
 	return nil
+}
+
+func (model *PetModel) GetPetsByNameAndDob(name string, birthdate time.Time) ([]PetDetail, error) {
+	pets := []PetDetail{}
+
+	stmt := `
+		SELECT pt.name, pt.birthdate, pty.name, pt.ownerId
+		FROM pets pt
+		INNER JOIN petTypes pty on pty.id = petTypeId
+		WHERE pt.name = ? and pt.birthdate = ?
+	`
+
+	rows, err := model.DB.Query(stmt, name, birthdate)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var pet PetDetail
+		if err := rows.Scan(&pet.Name, &pet.Birthdate, &pet.PetType, &pet.OwnerId); err != nil {
+			return nil, err
+		}
+		pets = append(pets, pet)
+	}
+
+	return pets, nil
 }

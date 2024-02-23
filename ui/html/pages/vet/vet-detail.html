@@ -28,6 +28,27 @@ Vet Detail
             <div class="col-lg-8">
                 <div class="card mb-4">
                     <div class="card-body">
+                        <div id='calendar'></div>
+
+                        <form class="mt-2">
+                            <input type="datetime-local" name="appointment-date">
+                            <button class="btn btn-outline-primary" onclick="submitDate()" type="button">Submit</button>
+                        </form>
+
+                        <form class="mt-2" hx-post="/pet/search" hx-target="#petList">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">Pet Name</span>
+                                <input type="text" class="form-control" placeholder="Pet Name" aria-label="Pet Name"
+                                    name="name" aria-describedby="petName" value="Mangss">
+                                <span class="input-group-text">Birthdate</span>
+                                <input type="date" class="form-control" aria-label="Birthdate" name="birthdate"
+                                    aria-describedby="birthdate" value="1234-12-12">
+                                <button class="btn btn-outline-success" type="submit">Search</button>
+                            </div>
+                        </form>
+
+                        <div class="" id="petList"></div>
+
                     </div>
                 </div>
 
@@ -55,5 +76,58 @@ Vet Detail
 </div>
 
 {{ end }}
+
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js'></script>
+<script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+
+<script>
+
+    document.addEventListener('htmx:configRequest', (event) => {
+        params = event.detail.parameters
+
+        params.birthdate = new Date(params.birthdate).toISOString()
+    })
+
+    function submitDate() {
+        const appt = document.getElementsByName('appointment-date')[0]
+        const utcTime = new Date().toISOString()
+    }
+
+    const oneHour = new Date(new Date().setHours(new Date().getHours() + 1))
+
+    var events = [
+        {
+            title: 'Mango Treatment',
+            start: new Date().toISOString(),
+            end: oneHour.toISOString(),
+        },
+        {
+            title: 'Acorn Treatment',
+            start: "2/21/2024, 8:32:00",
+            end: "2/21/2024, 10:32:00",
+        },
+        {
+            title: 'Summer Treatment',
+            start: "2023-11-06T16:00:00",
+            end: "2023-11-06T17:00:00",
+        }
+    ]
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'timeGridWeek',
+            headerToolbar: {
+                left: 'prev,next',
+                center: 'title',
+                right: 'timeGridWeek,timeGridDay' // user can switch between the two
+            },
+            nowIndicator: true,
+            events,
+        });
+        calendar.render();
+    });
+
+</script>
 
 {{ end }}

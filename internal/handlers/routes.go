@@ -27,6 +27,7 @@ func Routes(app *app.App) *httprouter.Router {
 	petHandler := NewPetHandler(app)
 	router.Handler(http.MethodGet, "/admin", dynamic.ThenFunc(petHandler.adminPage))
 	router.Handler(http.MethodPost, "/pet/add-pet-type", dynamic.ThenFunc(petHandler.newPetTypePost))
+	router.Handler(http.MethodPost, "/pet/search", dynamic.ThenFunc(petHandler.getPetsByNameAndDob))
 
 	vetHandler := NewVetHandler(app)
 	router.Handler(http.MethodGet, "/vet", dynamic.ThenFunc(vetHandler.vetList))
