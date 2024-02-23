@@ -37,6 +37,7 @@ func Routes(app *app.App) *httprouter.Router {
 	router.Handler(http.MethodGet, "/vet/edit/:id", dynamic.ThenFunc(vetHandler.vetEdit))
 	router.Handler(http.MethodPut, "/vet/edit/:id", dynamic.ThenFunc(vetHandler.vetEditPut))
 	router.Handler(http.MethodDelete, "/vet/:id", dynamic.ThenFunc(vetHandler.vetRemove))
+	router.Handler(http.MethodPost, "/vet/visit", dynamic.ThenFunc(vetHandler.vetCreateVisitPost))
 
 	return router
 }

@@ -30,9 +30,17 @@ Vet Detail
                     <div class="card-body">
                         <div id='calendar'></div>
 
-                        <form class="mt-2">
-                            <input type="datetime-local" name="appointment-date">
-                            <button class="btn btn-outline-primary" onclick="submitDate()" type="button">Submit</button>
+                        <form class="mt-2" hx-swap="none" hx-post="/vet/visit">
+                            <div class="input-group justify-content-end">
+                                <input type="datetime-local" name="appointment-date">
+                                <button class="btn btn-outline-primary" onclick="submitDate()"
+                                    type="submit">Submit</button>
+                            </div>
+
+                            <div class="input-group mt-2">
+                                <span class="input-group-text">Reason for visit</span>
+                                <textarea class="form-control" aria-label="With textarea"></textarea>
+                            </div>
                         </form>
 
                         <form class="mt-2" hx-post="/pet/search" hx-target="#petList">
@@ -85,7 +93,13 @@ Vet Detail
     document.addEventListener('htmx:configRequest', (event) => {
         params = event.detail.parameters
 
-        params.birthdate = new Date(params.birthdate).toISOString()
+        if (event.detail.path === '/pet/search') {
+            params.birthdate = new Date(params.birthdate).toISOString()
+            return
+        }
+
+
+        console.log(event.detail)
     })
 
     function submitDate() {
@@ -124,6 +138,12 @@ Vet Detail
             },
             nowIndicator: true,
             events,
+            eventClick: function (info) {
+                window.location.href = "/owner/detail/15"
+
+                // change the border color just for fun
+                info.el.style.borderColor = 'red';
+            }
         });
         calendar.render();
     });

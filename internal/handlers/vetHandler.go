@@ -195,3 +195,20 @@ func (handler *VetHandler) vetRemove(w http.ResponseWriter, r *http.Request) {
 	handler.Session.Put(r.Context(), alertConstants.FLASH_MSG, "Vet removed")
 	w.Header().Add("HX-Redirect", "/vet")
 }
+
+type createVisitForm struct {
+	models.CreateVisitDto `json:"visit"`
+	validator.Validator   `form:"-"`
+}
+
+func (handler *VetHandler) vetCreateVisitPost(w http.ResponseWriter, r *http.Request) {
+	var form createVisitForm
+
+	err := json.NewDecoder(r.Body).Decode(&form)
+	if err != nil {
+		handler.ClientError(w, r, http.StatusBadRequest)
+		return
+	}
+
+	fmt.Println(form)
+}
