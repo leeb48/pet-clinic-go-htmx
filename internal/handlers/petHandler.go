@@ -3,7 +3,6 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -79,10 +78,11 @@ type petSearchForm struct {
 func (handler *PetHandler) getPetsByNameAndDob(w http.ResponseWriter, r *http.Request) {
 	var form petSearchForm
 
+	data := handler.NewTemplateData(r)
+
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
-		fmt.Println(err.Error())
-		handler.ClientError(w, r, http.StatusBadRequest)
+		handler.RenderPartial(w, r, http.StatusOK, "pet-list.html", data)
 		return
 	}
 
@@ -92,8 +92,6 @@ func (handler *PetHandler) getPetsByNameAndDob(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	data := handler.NewTemplateData(r)
 	data.Form = pets
-
 	handler.RenderPartial(w, r, http.StatusOK, "pet-list.html", data)
 }

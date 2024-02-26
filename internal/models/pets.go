@@ -132,7 +132,7 @@ func (model *PetModel) GetPetsByNameAndDob(name string, birthdate time.Time) ([]
 	pets := []PetDetail{}
 
 	stmt := `
-		SELECT pt.name, pt.birthdate, pty.name, pt.ownerId
+		SELECT pt.Id, pt.name, pt.birthdate, pty.name, pt.ownerId
 		FROM pets pt
 		INNER JOIN petTypes pty on pty.id = petTypeId
 		WHERE pt.name = ? and pt.birthdate = ?
@@ -145,7 +145,7 @@ func (model *PetModel) GetPetsByNameAndDob(name string, birthdate time.Time) ([]
 
 	for rows.Next() {
 		var pet PetDetail
-		if err := rows.Scan(&pet.Name, &pet.Birthdate, &pet.PetType, &pet.OwnerId); err != nil {
+		if err := rows.Scan(&pet.Id, &pet.Name, &pet.Birthdate, &pet.PetType, &pet.OwnerId); err != nil {
 			return nil, err
 		}
 		pets = append(pets, pet)

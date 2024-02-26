@@ -10,11 +10,10 @@
     </thead>
     <tbody>
         {{ range .Form }}
-        <tr class="pet_row" onclick="selectPet(this)">
+        <tr class="pet_row" onclick="selectPet(this)" data-pet-id="{{ .Id }}">
             <th scope="row">{{ .Name }}</th>
             <td>{{ .PetType }}</td>
             <td>{{ .Birthdate | birthdate }}</td>
-            <input type="hidden" name="ownerId" value="{{ .OwnerId }}">
         </tr>
         {{end}}
     </tbody>

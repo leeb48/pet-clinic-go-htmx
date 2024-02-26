@@ -204,11 +204,25 @@ type createVisitForm struct {
 func (handler *VetHandler) vetCreateVisitPost(w http.ResponseWriter, r *http.Request) {
 	var form createVisitForm
 
+	data := handler.NewTemplateData(r)
+
 	err := json.NewDecoder(r.Body).Decode(&form)
 	if err != nil {
-		handler.ClientError(w, r, http.StatusBadRequest)
+		data.Alert = app.Alert{MsgType: alertConstants.DANGER, Msg: "Please check to make sure all inputs are correct."}
+		handler.RenderPartial(w, r, http.StatusBadRequest, "alert.html", data)
 		return
 	}
 
-	fmt.Println(form)
+	form.CheckField(validator.NotNilId(form.PetId), "error", "Pet ID could not be found")
+	form.CheckField(validator.NotNilId(form.VetId), "error", "Vet ID could not be found")
+
+	if !form.Validator.Valid() {
+		data.Alert = app.Alert{MsgType: alertConstants.DANGER,
+			Msg: fmt.Sprintf("%v", form.Validator.FieldErrors["error"])}
+		handler.RenderPartial(w, r, http.StatusBadRequest, "alert.html", data)
+		return
+	}
+
+	data.Alert = app.Alert{MsgType: alertConstants.SUCCESS, Msg: "Appointment created."}
+	handler.RenderPartial(w, r, http.StatusOK, "appt-form.html", data)
 }

@@ -1,0 +1,28 @@
+{{ define "main" }}
+
+<div id="alert" hx-swap-oob="true" class="alert alert-{{ .Alert.MsgType }} alert-dismissible fade show" role="alert">
+    {{ .Alert.Msg }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+
+<form class="mt-2" hx-post="/vet/visit">
+    <div class="input-group justify-content-end">
+        <input type="datetime-local" name="appointment">
+        <button class="btn btn-outline-primary" type="submit">Submit</button>
+    </div>
+
+    <div class="input-group mt-2">
+        <span class="input-group-text">Reason for visit</span>
+        <textarea name="visitReason" class="form-control" aria-label="With textarea"></textarea>
+    </div>
+</form>
+
+<script>
+    for (let alert of document.querySelectorAll('.alert')) {
+        setTimeout(() => {
+            alert.innerHTML = ''
+            alert.className = ''
+        }, 3000);
+    }
+</script>
+{{ end }}

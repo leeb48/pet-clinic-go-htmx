@@ -15,10 +15,10 @@ type Visit struct {
 }
 
 type CreateVisitDto struct {
-	PetId       int
-	VetId       int
-	Appointment time.Time
-	VisitReason string
+	PetId       int       `json:"petId"`
+	VetId       int       `json:"vetId"`
+	Appointment time.Time `json:"appointment"`
+	VisitReason string    `json:"visitReason"`
 }
 
 type VisitModelInterface interface {
