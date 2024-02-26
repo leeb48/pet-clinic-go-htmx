@@ -149,6 +149,15 @@ Vet Detail
         if (elt.id === 'appt-form') {
             renderCalendar()
         }
+
+        if (elt.id === 'alert') {
+            for (let alert of document.querySelectorAll('#alert')) {
+                setTimeout(() => {
+                    alert.innerHTML = ''
+                    alert.className = ''
+                }, 3000);
+            }
+        }
     })
 
     function renderCalendar() {
