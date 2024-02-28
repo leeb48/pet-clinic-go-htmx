@@ -32,10 +32,14 @@ Vet Detail
                     <div class="card-body">
                         <div id='calendar'></div>
 
-                        <form class="mt-2" hx-post="/vet/visit" id="appt-form" hx-target-4x="#alert">
-                            <div class="input-group justify-content-end">
-                                <input type="datetime-local" name="appointment">
-                                <button class="btn btn-outline-primary" type="submit">Submit</button>
+                        <form class="mt-2" hx-post="/vet/visit" id="appt-form" hx-target-4x="#alert"
+                            hx-target-5x="body">
+                            <div class="input-group">
+                                <span class="input-group-text">Appt</span>
+                                <input class="form-control w-auto" type="datetime-local" name="appointment">
+                                <span class="input-group-text">Hour</span>
+                                <input class="form-control w-10" type="number" name="duration" value="1">
+                                <button class="btn btn-outline-primary" type="submit">Create</button>
                             </div>
 
                             <div class="input-group mt-2">
@@ -99,14 +103,6 @@ Vet Detail
         }
 
         pathMapping[event.detail.path](params);
-
-        events.push(
-            {
-                title: 'Summer Treatment',
-                start: "2024-02-26T13:00:00",
-                end: "2024-02-26T14:00:00",
-            }
-        )
     })
 
     function petSearch(params) {
@@ -132,13 +128,6 @@ Vet Detail
 
     const oneHour = new Date(new Date().setHours(new Date().getHours() + 1))
 
-    var events = [
-        {
-            title: 'Mango Treatment',
-            start: new Date().toISOString(),
-            end: oneHour.toISOString(),
-        },
-    ]
 
     document.addEventListener('DOMContentLoaded', function () {
         renderCalendar()
@@ -161,6 +150,18 @@ Vet Detail
     })
 
     function renderCalendar() {
+        const events = [
+            {
+                title: 'Mango Treatment',
+                start: new Date().toISOString(),
+                end: oneHour.toISOString(),
+            },
+        ]
+
+        '{{range .Form.Visits}}'
+        console.log('{{.Appointment}}')
+        '{{ end }}'
+
         const calendarEl = document.getElementById('calendar');
         const calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'timeGridWeek',

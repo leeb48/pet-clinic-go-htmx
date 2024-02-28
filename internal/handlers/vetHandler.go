@@ -58,6 +58,7 @@ type vetDetailForm struct {
 	Id        int
 	FirstName string
 	LastName  string
+	Visits    []models.VisitDetailDto
 }
 
 func (handler *VetHandler) vetDetail(w http.ResponseWriter, r *http.Request) {
@@ -75,11 +76,18 @@ func (handler *VetHandler) vetDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	visits, err := handler.Visits.GetByVetId(vetId)
+	if err != nil {
+		handler.ServerError(w, r, err)
+		return
+	}
+
 	data := handler.NewTemplateData(r)
 	data.Form = vetDetailForm{
 		Id:        vet.Id,
 		FirstName: vet.FirstName,
 		LastName:  vet.LastName,
+		Visits:    visits,
 	}
 
 	handler.Render(w, r, http.StatusOK, "vet-detail.html", data)
@@ -198,6 +206,7 @@ func (handler *VetHandler) vetRemove(w http.ResponseWriter, r *http.Request) {
 
 type createVisitForm struct {
 	models.CreateVisitDto `json:"visit"`
+	Visits                models.VisitDetailDto
 	validator.Validator   `form:"-"`
 }
 
@@ -220,6 +229,12 @@ func (handler *VetHandler) vetCreateVisitPost(w http.ResponseWriter, r *http.Req
 		data.Alert = app.Alert{MsgType: alertConstants.DANGER,
 			Msg: fmt.Sprintf("%v", form.Validator.FieldErrors["error"])}
 		handler.RenderPartial(w, r, http.StatusBadRequest, "alert.html", data)
+		return
+	}
+
+	err = handler.Visits.Create(form.PetId, form.VetId, form.Appointment, form.VisitReason)
+	if err != nil {
+		handler.ServerError(w, r, err)
 		return
 	}
 
