@@ -9,7 +9,7 @@ import (
 type VisitModel struct {
 }
 
-func (model *VisitModel) Create(petId, vetId int, appt time.Time, visitReason string) error {
+func (model *VisitModel) Create(petId, vetId int, appt time.Time, visitReason string, duration int) error {
 
 	return nil
 }

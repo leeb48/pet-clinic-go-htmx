@@ -5,10 +5,13 @@
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 
-<form class="mt-2" hx-post="/vet/visit">
-    <div class="input-group justify-content-end">
-        <input type="datetime-local" name="appointment">
-        <button class="btn btn-outline-primary" type="submit">Submit</button>
+<form class="mt-2" hx-post="/vet/visit" id="appt-form" hx-target-4x="#alert" hx-target-5x="body">
+    <div class="input-group">
+        <span class="input-group-text">Appt</span>
+        <input class="form-control w-auto" type="datetime-local" name="appointment">
+        <span class="input-group-text">Hour</span>
+        <input class="form-control w-10" type="number" name="duration" value="1">
+        <button class="btn btn-outline-primary" type="submit">Create</button>
     </div>
 
     <div class="input-group mt-2">
@@ -16,4 +19,8 @@
         <textarea name="visitReason" class="form-control" aria-label="With textarea"></textarea>
     </div>
 </form>
+
+<script>
+    renderCalendar()
+</script>
 {{ end }}

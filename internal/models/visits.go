@@ -12,6 +12,7 @@ type Visit struct {
 	Appointment time.Time
 	Created     time.Time
 	VisitReason string
+	Duration    int
 }
 
 type CreateVisitDto struct {
@@ -19,6 +20,7 @@ type CreateVisitDto struct {
 	VetId       int       `json:"vetId"`
 	Appointment time.Time `json:"appointment"`
 	VisitReason string    `json:"visitReason"`
+	Duration    int       `json:"duration"`
 }
 
 type VisitDetailDto struct {
@@ -31,10 +33,11 @@ type VisitDetailDto struct {
 	VetLastName  string
 	Appointment  time.Time
 	VisitReason  string
+	Duration     int
 }
 
 type VisitModelInterface interface {
-	Create(petId, vetId int, appt time.Time, visitReason string) error
+	Create(petId, vetId int, appt time.Time, visitReason string, duration int) error
 	GetByVetId(vetId int) ([]VisitDetailDto, error)
 }
 
@@ -42,14 +45,14 @@ type VisitModel struct {
 	DB *sql.DB
 }
 
-func (model *VisitModel) Create(petId, vetId int, appt time.Time, visitReason string) error {
+func (model *VisitModel) Create(petId, vetId int, appt time.Time, visitReason string, duration int) error {
 
 	stmt := `
-		INSERT INTO visits (petId, vetId, appointment, created, visitReason)
-		VALUES (?, ?, ?, UTC_TIMESTAMP(), ?)
+		INSERT INTO visits (petId, vetId, appointment, created, visitReason, duration)
+		VALUES (?, ?, ?, UTC_TIMESTAMP(), ?, ?)
 	`
 
-	_, err := model.DB.Exec(stmt, petId, vetId, appt, visitReason)
+	_, err := model.DB.Exec(stmt, petId, vetId, appt, visitReason, duration)
 	if err != nil {
 		return err
 	}
@@ -70,7 +73,8 @@ func (model *VisitModel) GetByVetId(vetId int) ([]VisitDetailDto, error) {
 			vet.firstName,
 			vet.lastName,
 			visit.appointment,
-			visit.visitReason
+			visit.visitReason,
+			visit.duration
 		FROM
 			visits visit
 			INNER JOIN vets vet on vet.id = visit.vetId
@@ -87,9 +91,9 @@ func (model *VisitModel) GetByVetId(vetId int) ([]VisitDetailDto, error) {
 
 	for rows.Next() {
 		var visitDetail VisitDetailDto
-		err := rows.Scan(&visitDetail.Id, &visitDetail.PetId, &visitDetail.PetName,
-			&visitDetail.PetType, &visitDetail.VetId, &visitDetail.VetFirstName,
-			&visitDetail.VetLastName, &visitDetail.Appointment, &visitDetail.VisitReason)
+		err := rows.Scan(&visitDetail.Id, &visitDetail.PetId, &visitDetail.PetName, &visitDetail.PetType,
+			&visitDetail.VetId, &visitDetail.VetFirstName, &visitDetail.VetLastName, &visitDetail.Appointment,
+			&visitDetail.VisitReason, &visitDetail.Duration)
 
 		if err != nil {
 			return visits, err

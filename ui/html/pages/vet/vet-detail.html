@@ -123,11 +123,9 @@ Vet Detail
             visitReason: params.visitReason,
             petId: Number(selectedPet?.dataset?.petId),
             vetId: Number('{{ .Form.Id }}'),
+            duration: Number(params.duration),
         }
     }
-
-    const oneHour = new Date(new Date().setHours(new Date().getHours() + 1))
-
 
     document.addEventListener('DOMContentLoaded', function () {
         renderCalendar()
@@ -135,10 +133,6 @@ Vet Detail
 
     document.addEventListener('htmx:afterSwap', (event) => {
         const elt = event.detail.elt
-        if (elt.id === 'appt-form') {
-            renderCalendar()
-        }
-
         if (elt.id === 'alert') {
             for (let alert of document.querySelectorAll('#alert')) {
                 setTimeout(() => {
@@ -150,17 +144,18 @@ Vet Detail
     })
 
     function renderCalendar() {
-        const events = [
-            {
-                title: 'Mango Treatment',
-                start: new Date().toISOString(),
-                end: oneHour.toISOString(),
-            },
-        ]
 
-        '{{range .Form.Visits}}'
-        console.log('{{.Appointment}}')
+        const events = []
+
+        '{{ range .Form.Visits }}'
+        events.push({
+            title: '{{ .PetName }}',
+            start: new Date('{{ .Appointment }}'),
+            end: new Date().setHours(new Date('{{ .Appointment }}').getHours() + 1)
+        })
         '{{ end }}'
+
+        console.log('{{ .Form.Visits }}')
 
         const calendarEl = document.getElementById('calendar');
         const calendar = new FullCalendar.Calendar(calendarEl, {

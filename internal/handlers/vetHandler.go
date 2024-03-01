@@ -206,7 +206,7 @@ func (handler *VetHandler) vetRemove(w http.ResponseWriter, r *http.Request) {
 
 type createVisitForm struct {
 	models.CreateVisitDto `json:"visit"`
-	Visits                models.VisitDetailDto
+	Visits                []models.VisitDetailDto
 	validator.Validator   `form:"-"`
 }
 
@@ -232,10 +232,21 @@ func (handler *VetHandler) vetCreateVisitPost(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	err = handler.Visits.Create(form.PetId, form.VetId, form.Appointment, form.VisitReason)
+	err = handler.Visits.Create(form.PetId, form.VetId, form.Appointment, form.VisitReason, form.Duration)
 	if err != nil {
 		handler.ServerError(w, r, err)
 		return
+	}
+
+	visits, err := handler.Visits.GetByVetId(form.VetId)
+	if err != nil {
+		data.Alert = app.Alert{MsgType: alertConstants.WARNING, Msg: "Failed to get latests visits."}
+		handler.RenderPartial(w, r, http.StatusBadRequest, "alert.html", data)
+		return
+	}
+
+	data.Form = &createVisitForm{
+		Visits: visits,
 	}
 
 	data.Alert = app.Alert{MsgType: alertConstants.SUCCESS, Msg: "Appointment created."}
