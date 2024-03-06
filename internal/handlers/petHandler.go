@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"pet-clinic.bonglee.com/internal/app"
+	"pet-clinic.bonglee.com/internal/models"
 	"pet-clinic.bonglee.com/internal/models/customErrors"
 	"pet-clinic.bonglee.com/internal/validator"
 )
@@ -68,4 +69,29 @@ func (handler *PetHandler) newPetTypePost(w http.ResponseWriter, r *http.Request
 	}
 
 	http.Redirect(w, r, "/admin", http.StatusSeeOther)
+}
+
+type petSearchForm struct {
+	models.PetDetail
+}
+
+func (handler *PetHandler) getPetsByNameAndDob(w http.ResponseWriter, r *http.Request) {
+	var form petSearchForm
+
+	data := handler.NewTemplateData(r)
+
+	err := json.NewDecoder(r.Body).Decode(&form)
+	if err != nil {
+		handler.RenderPartial(w, r, http.StatusOK, "pet-list.html", data)
+		return
+	}
+
+	pets, err := handler.Pets.GetPetsByNameAndDob(form.Name, form.Birthdate)
+	if err != nil {
+		handler.ServerError(w, r, err)
+		return
+	}
+
+	data.Form = pets
+	handler.RenderPartial(w, r, http.StatusOK, "pet-list.html", data)
 }

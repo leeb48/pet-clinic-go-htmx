@@ -32,6 +32,7 @@ func NewTestApp(t *testing.T) *App {
 		PetTypes:      &mocks.PetTypeModel{},
 		Pets:          &mocks.PetModel{},
 		Vets:          &mocks.VetModel{},
+		Visits:        &mocks.VisitModel{},
 	}
 
 	return app

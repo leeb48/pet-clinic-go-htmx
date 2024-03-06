@@ -1,0 +1,4 @@
+ALTER TABLE
+    visits
+ADD
+    COLUMN duration INTEGER NOT NULL;

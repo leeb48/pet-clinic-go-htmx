@@ -1,0 +1,31 @@
+{{ define "main" }}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Type</th>
+            <th scope="col">Birthdate</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{ range .Form }}
+        <tr class="pet_row" onclick="selectPet(this)" data-pet-id="{{ .Id }}">
+            <th scope="row">{{ .Name }}</th>
+            <td>{{ .PetType }}</td>
+            <td>{{ .Birthdate | birthdate }}</td>
+        </tr>
+        {{end}}
+    </tbody>
+</table>
+
+<script>
+    function selectPet(row) {
+        for (let petRow of document.querySelectorAll('.pet_row')) {
+            petRow.classList.remove('table-success')
+        }
+        row.classList.add('table-success')
+    }
+</script>
+
+{{ end }}

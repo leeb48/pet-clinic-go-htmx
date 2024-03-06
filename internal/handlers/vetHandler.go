@@ -58,6 +58,7 @@ type vetDetailForm struct {
 	Id        int
 	FirstName string
 	LastName  string
+	Visits    string
 }
 
 func (handler *VetHandler) vetDetail(w http.ResponseWriter, r *http.Request) {
@@ -75,11 +76,24 @@ func (handler *VetHandler) vetDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	visits, err := handler.Visits.GetByVetId(vetId)
+	if err != nil {
+		handler.ServerError(w, r, err)
+		return
+	}
+
+	visitsJson, err := json.Marshal(visits)
+	if err != nil {
+		handler.ServerError(w, r, err)
+		return
+	}
+
 	data := handler.NewTemplateData(r)
 	data.Form = vetDetailForm{
 		Id:        vet.Id,
 		FirstName: vet.FirstName,
 		LastName:  vet.LastName,
+		Visits:    string(visitsJson),
 	}
 
 	handler.Render(w, r, http.StatusOK, "vet-detail.html", data)
@@ -194,4 +208,60 @@ func (handler *VetHandler) vetRemove(w http.ResponseWriter, r *http.Request) {
 
 	handler.Session.Put(r.Context(), alertConstants.FLASH_MSG, "Vet removed")
 	w.Header().Add("HX-Redirect", "/vet")
+}
+
+type createVisitForm struct {
+	models.CreateVisitDto `json:"visit"`
+	Visits                string
+	validator.Validator   `form:"-"`
+}
+
+func (handler *VetHandler) vetCreateVisitPost(w http.ResponseWriter, r *http.Request) {
+	var form createVisitForm
+
+	data := handler.NewTemplateData(r)
+
+	err := json.NewDecoder(r.Body).Decode(&form)
+	if err != nil {
+		data.Alert = app.Alert{MsgType: alertConstants.DANGER, Msg: "Please check to make sure all inputs are correct."}
+		handler.RenderPartial(w, r, http.StatusBadRequest, "alert.html", data)
+		return
+	}
+
+	form.CheckField(validator.NotNilId(form.PetId), "error", "Pet ID could not be found")
+	form.CheckField(validator.NotNilId(form.VetId), "error", "Vet ID could not be found")
+
+	if !form.Validator.Valid() {
+		data.Alert = app.Alert{MsgType: alertConstants.DANGER,
+			Msg: fmt.Sprintf("%v", form.Validator.FieldErrors["error"])}
+		handler.RenderPartial(w, r, http.StatusBadRequest, "alert.html", data)
+		return
+	}
+
+	err = handler.Visits.Create(form.PetId, form.VetId, form.Appointment, form.VisitReason, form.Duration)
+	if err != nil {
+		handler.ServerError(w, r, err)
+		return
+	}
+
+	visits, err := handler.Visits.GetByVetId(form.VetId)
+	if err != nil {
+		data.Alert = app.Alert{MsgType: alertConstants.WARNING, Msg: "Failed to get latests visits."}
+		handler.RenderPartial(w, r, http.StatusBadRequest, "alert.html", data)
+		return
+	}
+
+	visitsJson, err := json.Marshal(visits)
+	if err != nil {
+		data.Alert = app.Alert{MsgType: alertConstants.WARNING, Msg: "Failed to get latests visits."}
+		handler.RenderPartial(w, r, http.StatusBadRequest, "alert.html", data)
+		return
+	}
+
+	data.Form = &createVisitForm{
+		Visits: string(visitsJson),
+	}
+
+	data.Alert = app.Alert{MsgType: alertConstants.SUCCESS, Msg: "Appointment created."}
+	handler.RenderPartial(w, r, http.StatusOK, "appt-form.html", data)
 }

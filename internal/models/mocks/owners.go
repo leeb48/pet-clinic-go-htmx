@@ -12,6 +12,35 @@ type OwnerModel struct{}
 
 var MockOwners = ResetMockOwners()
 
+func ResetMockOwners() []models.Owner {
+	return []models.Owner{
+		{
+			Id:        1,
+			FirstName: "Mango",
+			LastName:  "Lee",
+			Address:   "123 Dog St",
+			State:     "NV",
+			City:      "Las Vegas",
+			Phone:     "7024445678",
+			Email:     "mangs@test.com",
+			Birthdate: time.Now(),
+			Created:   time.Now(),
+		},
+		{
+			Id:        2,
+			FirstName: "Mango",
+			LastName:  "Lee",
+			Address:   "123 Dog St",
+			State:     "NV",
+			City:      "Las Vegas",
+			Phone:     "7024445678",
+			Email:     "mangs@test.com",
+			Birthdate: time.Now(),
+			Created:   time.Now(),
+		},
+	}
+}
+
 func (model *OwnerModel) Insert(firstName, lastName, addr, state, city, phone, email, birthdate string) (int, error) {
 
 	if firstName == "ownerModelError" {
@@ -65,33 +94,4 @@ func (model *OwnerModel) RemoveOwner(id int) error {
 	}
 
 	return nil
-}
-
-func ResetMockOwners() []models.Owner {
-	return []models.Owner{
-		{
-			Id:        1,
-			FirstName: "Mango",
-			LastName:  "Lee",
-			Address:   "123 Dog St",
-			State:     "NV",
-			City:      "Las Vegas",
-			Phone:     "7024445678",
-			Email:     "mangs@test.com",
-			Birthdate: time.Now(),
-			Created:   time.Now(),
-		},
-		{
-			Id:        2,
-			FirstName: "Mango",
-			LastName:  "Lee",
-			Address:   "123 Dog St",
-			State:     "NV",
-			City:      "Las Vegas",
-			Phone:     "7024445678",
-			Email:     "mangs@test.com",
-			Birthdate: time.Now(),
-			Created:   time.Now(),
-		},
-	}
 }

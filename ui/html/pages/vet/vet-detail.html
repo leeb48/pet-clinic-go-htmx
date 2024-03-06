@@ -8,6 +8,8 @@ Vet Detail
 
 {{with .Form }}
 
+<div id="alert"></div>
+
 <section style="background-color: #eee;">
     <div class="container py-5">
 
@@ -28,6 +30,37 @@ Vet Detail
             <div class="col-lg-8">
                 <div class="card mb-4">
                     <div class="card-body">
+                        <div id='calendar'></div>
+
+                        <form class="mt-2" hx-post="/vet/visit" id="appt-form" hx-target-4x="#alert"
+                            hx-target-5x="body">
+                            <div class="input-group">
+                                <span class="input-group-text">Appt</span>
+                                <input class="form-control w-auto" type="datetime-local" name="appointment">
+                                <span class="input-group-text">Hour</span>
+                                <input class="form-control w-10" type="number" name="duration" value="1">
+                                <button class="btn btn-outline-primary" type="submit">Create</button>
+                            </div>
+
+                            <div class="input-group mt-2">
+                                <span class="input-group-text">Reason for visit</span>
+                                <textarea name="visitReason" class="form-control" aria-label="With textarea"></textarea>
+                            </div>
+                        </form>
+
+                        <form class="mt-2" hx-post="/pet/search" hx-target="#petList" hx-target-4*="#petList">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">Pet Name</span>
+                                <input type="text" class="form-control" placeholder="Pet Name" aria-label="Pet Name"
+                                    name="name" aria-describedby="petName" value="Mangss">
+                                <span class="input-group-text">Birthdate</span>
+                                <input type="date" class="form-control" aria-label="Birthdate" name="birthdate"
+                                    aria-describedby="birthdate" value="1234-12-12">
+                                <button class="btn btn-outline-success" type="submit">Search</button>
+                            </div>
+                        </form>
+
+                        <div class="" id="petList"></div>
                     </div>
                 </div>
 
@@ -55,5 +88,95 @@ Vet Detail
 </div>
 
 {{ end }}
+
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js'></script>
+<script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+
+<script>
+
+    document.addEventListener('htmx:configRequest', (event) => {
+        params = event.detail.parameters
+
+        const pathMapping = {
+            '/pet/search': petSearch,
+            '/vet/visit': createVisit,
+        }
+
+        pathMapping[event.detail.path](params);
+    })
+
+    function petSearch(params) {
+        if (params.birthdate) {
+            params.birthdate = new Date(params.birthdate).toISOString()
+        }
+    }
+
+    function createVisit(params) {
+        if (params.appointment) {
+            params.appointment = new Date(params.appointment).toISOString()
+        }
+
+        const selectedPet = document.querySelector('.pet_row.table-success')
+
+        params.visit = {
+            appointment: params.appointment,
+            visitReason: params.visitReason,
+            petId: Number(selectedPet?.dataset?.petId),
+            vetId: Number('{{ .Form.Id }}'),
+            duration: Number(params.duration),
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        renderCalendar(JSON.parse('{{ .Form.Visits }}'))
+    });
+
+    document.addEventListener('htmx:afterSwap', (event) => {
+        const elt = event.detail.elt
+        if (elt.id === 'alert') {
+            for (let alert of document.querySelectorAll('#alert')) {
+                setTimeout(() => {
+                    alert.innerHTML = ''
+                    alert.className = ''
+                }, 3000);
+            }
+        }
+
+        if (elt.id === 'appt-form') {
+            // renderCalendar()
+        }
+    })
+
+    function renderCalendar(visits = []) {
+
+        const events = []
+
+        for (const visit of visits) {
+            const startTime = new Date(visit.appointment)
+            events.push({
+                title: visit.petName,
+                start: startTime,
+                end: startTime.setHours(startTime.getHours() + visit.duration),
+            })
+        }
+
+        const calendarEl = document.getElementById('calendar');
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'timeGridWeek',
+            headerToolbar: {
+                left: 'prev,next',
+                center: 'title',
+                right: 'timeGridWeek,timeGridDay' // user can switch between the two
+            },
+            nowIndicator: true,
+            events,
+            eventClick: function (info) {
+                window.location.href = "/owner/detail/15"
+            }
+        });
+        calendar.render();
+    }
+
+</script>
 
 {{ end }}

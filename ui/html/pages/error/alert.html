@@ -1,0 +1,6 @@
+{{ define "main" }}
+<div id="alert" hx-swap-oob="true" class="alert alert-{{ .Alert.MsgType }} alert-dismissible fade show" role="alert">
+    {{ .Alert.Msg }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{{ end }}

@@ -61,6 +61,7 @@ func main() {
 		PetTypes:      &models.PetTypeModel{DB: db},
 		Pets:          &models.PetModel{DB: db},
 		Vets:          &models.VetModel{DB: db},
+		Visits:        &models.VisitModel{DB: db},
 	}
 
 	server := http.Server{

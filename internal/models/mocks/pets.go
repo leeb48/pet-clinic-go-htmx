@@ -11,6 +11,25 @@ type PetModel struct{}
 var MockPets []models.Pet = ResetMockPets()
 var PetUpdateCount int
 
+func ResetMockPets() []models.Pet {
+	return []models.Pet{
+		{
+			Id:        1,
+			Name:      "Mango",
+			Birthdate: time.Now(),
+			PetTypeId: 1,
+			OwnerId:   1,
+		},
+		{
+			Id:        2,
+			Name:      "Acorn",
+			Birthdate: time.Now(),
+			PetTypeId: 1,
+			OwnerId:   1,
+		},
+	}
+}
+
 func (model *PetModel) Insert(name string, birthdate time.Time, petTypeId, ownerId int) error {
 
 	MockPets = append(MockPets, models.Pet{
@@ -40,21 +59,7 @@ func (model *PetModel) Update(id int, name string, birthdate time.Time, petTypeI
 	return nil
 }
 
-func ResetMockPets() []models.Pet {
-	return []models.Pet{
-		{
-			Id:        1,
-			Name:      "Mango",
-			Birthdate: time.Now(),
-			PetTypeId: 1,
-			OwnerId:   1,
-		},
-		{
-			Id:        2,
-			Name:      "Acorn",
-			Birthdate: time.Now(),
-			PetTypeId: 1,
-			OwnerId:   1,
-		},
-	}
+func (model *PetModel) GetPetsByNameAndDob(name string, birthdate time.Time) ([]models.PetDetail, error) {
+
+	return []models.PetDetail{}, nil
 }
