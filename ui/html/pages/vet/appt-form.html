@@ -21,6 +21,6 @@
 </form>
 
 <script>
-    renderCalendar()
+    renderCalendar(JSON.parse('{{ .Form.Visits }}'))
 </script>
 {{ end }}

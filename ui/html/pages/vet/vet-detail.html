@@ -128,7 +128,7 @@ Vet Detail
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        renderCalendar()
+        renderCalendar(JSON.parse('{{ .Form.Visits }}'))
     });
 
     document.addEventListener('htmx:afterSwap', (event) => {
@@ -141,21 +141,24 @@ Vet Detail
                 }, 3000);
             }
         }
+
+        if (elt.id === 'appt-form') {
+            // renderCalendar()
+        }
     })
 
-    function renderCalendar() {
+    function renderCalendar(visits = []) {
 
         const events = []
 
-        '{{ range .Form.Visits }}'
-        events.push({
-            title: '{{ .PetName }}',
-            start: new Date('{{ .Appointment }}'),
-            end: new Date().setHours(new Date('{{ .Appointment }}').getHours() + 1)
-        })
-        '{{ end }}'
-
-        console.log('{{ .Form.Visits }}')
+        for (const visit of visits) {
+            const startTime = new Date(visit.appointment)
+            events.push({
+                title: visit.petName,
+                start: startTime,
+                end: startTime.setHours(startTime.getHours() + visit.duration),
+            })
+        }
 
         const calendarEl = document.getElementById('calendar');
         const calendar = new FullCalendar.Calendar(calendarEl, {

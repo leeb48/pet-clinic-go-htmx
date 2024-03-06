@@ -58,7 +58,7 @@ type vetDetailForm struct {
 	Id        int
 	FirstName string
 	LastName  string
-	Visits    []models.VisitDetailDto
+	Visits    string
 }
 
 func (handler *VetHandler) vetDetail(w http.ResponseWriter, r *http.Request) {
@@ -82,12 +82,18 @@ func (handler *VetHandler) vetDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	visitsJson, err := json.Marshal(visits)
+	if err != nil {
+		handler.ServerError(w, r, err)
+		return
+	}
+
 	data := handler.NewTemplateData(r)
 	data.Form = vetDetailForm{
 		Id:        vet.Id,
 		FirstName: vet.FirstName,
 		LastName:  vet.LastName,
-		Visits:    visits,
+		Visits:    string(visitsJson),
 	}
 
 	handler.Render(w, r, http.StatusOK, "vet-detail.html", data)
@@ -206,7 +212,7 @@ func (handler *VetHandler) vetRemove(w http.ResponseWriter, r *http.Request) {
 
 type createVisitForm struct {
 	models.CreateVisitDto `json:"visit"`
-	Visits                []models.VisitDetailDto
+	Visits                string
 	validator.Validator   `form:"-"`
 }
 
@@ -245,8 +251,15 @@ func (handler *VetHandler) vetCreateVisitPost(w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	visitsJson, err := json.Marshal(visits)
+	if err != nil {
+		data.Alert = app.Alert{MsgType: alertConstants.WARNING, Msg: "Failed to get latests visits."}
+		handler.RenderPartial(w, r, http.StatusBadRequest, "alert.html", data)
+		return
+	}
+
 	data.Form = &createVisitForm{
-		Visits: visits,
+		Visits: string(visitsJson),
 	}
 
 	data.Alert = app.Alert{MsgType: alertConstants.SUCCESS, Msg: "Appointment created."}

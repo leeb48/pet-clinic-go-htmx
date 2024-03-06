@@ -24,16 +24,16 @@ type CreateVisitDto struct {
 }
 
 type VisitDetailDto struct {
-	Id           int
-	PetId        int
-	PetName      string
-	PetType      string
-	VetId        int
-	VetFirstName string
-	VetLastName  string
-	Appointment  time.Time
-	VisitReason  string
-	Duration     int
+	Id           int       `json:"id"`
+	PetId        int       `json:"petId"`
+	PetName      string    `json:"petName"`
+	PetType      string    `json:"petType"`
+	VetId        int       `json:"vetId"`
+	VetFirstName string    `json:"vetFirstName"`
+	VetLastName  string    `json:"vetLastName"`
+	Appointment  time.Time `json:"appointment"`
+	VisitReason  string    `json:"visitReason"`
+	Duration     int       `json:"duration"`
 }
 
 type VisitModelInterface interface {
