@@ -19,3 +19,9 @@ func (model *VisitModel) GetByVetId(vetId int) ([]models.VisitDetailDto, error) 
 
 	return visits, nil
 }
+
+func (model *VisitModel) GetById(visitId int) (models.VisitDetailDto, error) {
+	visit := models.VisitDetailDto{}
+
+	return visit, nil
+}

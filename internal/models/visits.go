@@ -27,6 +27,7 @@ type VisitDetailDto struct {
 	Id           int       `json:"id"`
 	PetId        int       `json:"petId"`
 	PetName      string    `json:"petName"`
+	PetBirthdate time.Time `json:"petBirthdate"`
 	PetType      string    `json:"petType"`
 	VetId        int       `json:"vetId"`
 	VetFirstName string    `json:"vetFirstName"`
@@ -39,6 +40,7 @@ type VisitDetailDto struct {
 type VisitModelInterface interface {
 	Create(petId, vetId int, appt time.Time, visitReason string, duration int) error
 	GetByVetId(vetId int) ([]VisitDetailDto, error)
+	GetById(visitId int) (VisitDetailDto, error)
 }
 
 type VisitModel struct {
@@ -68,6 +70,7 @@ func (model *VisitModel) GetByVetId(vetId int) ([]VisitDetailDto, error) {
 			visit.id,
 			pet.id,
 			pet.name,
+			pet.birthdate,
 			petType.name,
 			vet.id,
 			vet.firstName,
@@ -90,17 +93,53 @@ func (model *VisitModel) GetByVetId(vetId int) ([]VisitDetailDto, error) {
 	}
 
 	for rows.Next() {
-		var visitDetail VisitDetailDto
-		err := rows.Scan(&visitDetail.Id, &visitDetail.PetId, &visitDetail.PetName, &visitDetail.PetType,
-			&visitDetail.VetId, &visitDetail.VetFirstName, &visitDetail.VetLastName, &visitDetail.Appointment,
-			&visitDetail.VisitReason, &visitDetail.Duration)
+		var visit VisitDetailDto
+		err := rows.Scan(&visit.Id, &visit.PetId, &visit.PetName, &visit.PetBirthdate,
+			&visit.PetType, &visit.VetId, &visit.VetFirstName, &visit.VetLastName,
+			&visit.Appointment, &visit.VisitReason, &visit.Duration)
 
 		if err != nil {
 			return visits, err
 		}
 
-		visits = append(visits, visitDetail)
+		visits = append(visits, visit)
 	}
 
 	return visits, nil
+}
+
+func (model *VisitModel) GetById(visitId int) (VisitDetailDto, error) {
+	visit := VisitDetailDto{}
+
+	stmt := `
+		SELECT
+			visit.id,
+			pet.id,
+			pet.name,
+			pet.birthdate,
+			petType.name,
+			vet.id,
+			vet.firstName,
+			vet.lastName,
+			visit.appointment,
+			visit.visitReason,
+			visit.duration
+		FROM
+			visits visit
+			INNER JOIN vets vet on vet.id = visit.vetId
+			INNER JOIN pets pet on pet.id = visit.petId
+			INNER JOIN petTypes petType on petType.id = pet.petTypeId
+		WHERE
+			visit.id = ?;
+	`
+
+	err := model.DB.QueryRow(stmt, visitId).Scan(&visit.Id, &visit.PetId, &visit.PetName,
+		&visit.PetBirthdate, &visit.PetType, &visit.VetId, &visit.VetFirstName,
+		&visit.VetLastName, &visit.Appointment, &visit.VisitReason, &visit.Duration)
+
+	if err != nil {
+		return visit, err
+	}
+
+	return visit, nil
 }

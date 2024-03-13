@@ -34,7 +34,7 @@ type ownerListForm struct {
 	Owners  []models.Owner
 }
 
-func (handler *OwnerHandler) ownerList(w http.ResponseWriter, r *http.Request) {
+func (handler *OwnerHandler) list(w http.ResponseWriter, r *http.Request) {
 	pageSizeInt := atoiWithDefault(r.URL.Query().Get("pageSize"), 10)
 	pageInt := atoiWithDefault(r.URL.Query().Get("pageSize"), 1)
 
@@ -65,7 +65,7 @@ type CreateOwnerForm struct {
 	validator.Validator `form:"-"`
 }
 
-func (handler *OwnerHandler) ownerCreate(w http.ResponseWriter, r *http.Request) {
+func (handler *OwnerHandler) createPage(w http.ResponseWriter, r *http.Request) {
 
 	petTypes, err := handler.PetTypes.GetAll()
 	if err != nil {
@@ -81,7 +81,7 @@ func (handler *OwnerHandler) ownerCreate(w http.ResponseWriter, r *http.Request)
 	handler.Render(w, r, http.StatusOK, "owner-create.html", data)
 }
 
-func (handler *OwnerHandler) ownerCreatePost(w http.ResponseWriter, r *http.Request) {
+func (handler *OwnerHandler) createPost(w http.ResponseWriter, r *http.Request) {
 	var form CreateOwnerForm
 
 	err := json.NewDecoder(r.Body).Decode(&form)
@@ -155,7 +155,7 @@ type ownerDetailForm struct {
 	Pets  []models.PetDetail
 }
 
-func (handler *OwnerHandler) ownerDetail(w http.ResponseWriter, r *http.Request) {
+func (handler *OwnerHandler) detail(w http.ResponseWriter, r *http.Request) {
 
 	params := httprouter.ParamsFromContext(r.Context())
 	id, err := strconv.Atoi(params.ByName("id"))
@@ -194,7 +194,7 @@ type EditOwnerForm struct {
 	validator.Validator `form:"-"`
 }
 
-func (handler *OwnerHandler) ownerEdit(w http.ResponseWriter, r *http.Request) {
+func (handler *OwnerHandler) editPage(w http.ResponseWriter, r *http.Request) {
 
 	params := httprouter.ParamsFromContext(r.Context())
 
@@ -238,7 +238,7 @@ func (handler *OwnerHandler) ownerEdit(w http.ResponseWriter, r *http.Request) {
 	handler.Render(w, r, http.StatusOK, "owner-edit.html", data)
 }
 
-func (handler *OwnerHandler) ownerEditPut(w http.ResponseWriter, r *http.Request) {
+func (handler *OwnerHandler) editPut(w http.ResponseWriter, r *http.Request) {
 	params := httprouter.ParamsFromContext(r.Context())
 
 	id := atoiWithDefault(params.ByName("id"), 0)
@@ -317,7 +317,7 @@ func (handler *OwnerHandler) ownerEditPut(w http.ResponseWriter, r *http.Request
 	w.Header().Add("HX-Redirect", fmt.Sprintf("/owner/detail/%v", id))
 }
 
-func (handler *OwnerHandler) ownerRemove(w http.ResponseWriter, r *http.Request) {
+func (handler *OwnerHandler) remove(w http.ResponseWriter, r *http.Request) {
 	params := httprouter.ParamsFromContext(r.Context())
 	id := atoiWithDefault(params.ByName("id"), 0)
 

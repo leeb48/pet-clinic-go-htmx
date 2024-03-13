@@ -19,6 +19,7 @@ type VetModelInterface interface {
 	GetById(id int) (Vet, error)
 	Update(id int, firstName, lastName string) error
 	Remove(id int) error
+	GetVetsByLastName(lastName string, page, pageSize int) ([]Vet, error)
 }
 
 type VetModel struct {
@@ -138,4 +139,32 @@ func (model *VetModel) Remove(id int) error {
 	}
 
 	return nil
+}
+
+func (model *VetModel) GetVetsByLastName(lastName string, page, pageSize int) ([]Vet, error) {
+	vets := []Vet{}
+
+	stmt := `
+		SELECT id, firstName, lastName
+		FROM vets
+		WHERE lastName = ?
+		LIMIT ?
+		OFFSET ?
+	`
+
+	rows, err := model.DB.Query(stmt, lastName, page, pageSize)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var vet Vet
+		if err := rows.Scan(&vet.Id, &vet.FirstName, &vet.LastName); err != nil {
+			return nil, err
+		}
+
+		vets = append(vets, vet)
+	}
+
+	return vets, nil
 }

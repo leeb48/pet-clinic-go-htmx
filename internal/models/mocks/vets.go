@@ -37,3 +37,9 @@ func (model *VetModel) Remove(id int) error {
 
 	return nil
 }
+
+func (model *VetModel) GetVetsByLastName(lastName string, page, pageSize int) ([]models.Vet, error) {
+	vets := []models.Vet{}
+
+	return vets, nil
+}
