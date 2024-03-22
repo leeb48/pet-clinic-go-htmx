@@ -25,11 +25,12 @@ Visit Detail
                                 data-bs-target="#removeOwnerModal">Remove</button>
                         </div>
                     </div>
-                </div>
 
+                </div>
                 <div class="card mb-4">
                     <div class="card-body text-center">
-                        <form class="mt-2" hx-post="/vet/search" hx-target="#vetList" hx-target-4*="#vetList">
+                        <form class="mt-2" hx-post="/vet/search?pageSize={{ .VetPageSize }}" hx-target="#vetList"
+                            hx-target-4*="#alert" hx-target-5*="#alert">
                             <div class="input-group mb-3">
                                 <span class="input-group-text">Last Name</span>
                                 <input type="text" class="form-control" placeholder="Last Name" aria-label="Last Name"

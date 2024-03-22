@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -211,17 +210,30 @@ type searchVetForm struct {
 }
 
 func (handler *VetHandler) getByLastName(w http.ResponseWriter, r *http.Request) {
+
+	params := httprouter.ParamsFromContext(r.Context())
+	page := atoiWithDefault(params.ByName("page"), 0)
+	pageSize := atoiWithDefault(params.ByName("pageSize"), 3)
+
 	var form searchVetForm
 
 	data := handler.NewTemplateData(r)
 
 	err := json.NewDecoder(r.Body).Decode(&form)
-	err = errors.New("Test error")
 	if err != nil {
+		handler.Logger.Error(err.Error())
 		data.Alert = app.Alert{MsgType: alertConstants.DANGER, Msg: "Error while parsing search data."}
 		handler.RenderPartial(w, r, http.StatusBadRequest, "alert.html", data)
 		return
 	}
 
-	fmt.Println(form)
+	vets, err := handler.Vets.GetVetsByLastName(form.LastName, page, pageSize)
+	if err != nil {
+		handler.Logger.Error(err.Error())
+		data.Alert = app.Alert{MsgType: alertConstants.DANGER, Msg: "Error while searching vets."}
+		handler.RenderPartial(w, r, http.StatusBadRequest, "alert.html", data)
+		return
+	}
+
+	fmt.Println(vets)
 }

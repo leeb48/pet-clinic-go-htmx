@@ -68,7 +68,7 @@ func (model *VisitModel) GetByVetId(vetId int) ([]VisitDetailDto, error) {
 	stmt := `
 		SELECT
 			visit.id,
-			pet.id,
+		pet.id,
 			pet.name,
 			pet.birthdate,
 			petType.name,

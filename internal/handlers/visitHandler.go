@@ -24,6 +24,7 @@ func NewVisitHandler(app *app.App) *VisitHandler {
 
 type VisitDetailForm struct {
 	VisitDetail models.VisitDetailDto
+	VetPageSize int
 }
 
 func (handler *VisitHandler) visitDetail(w http.ResponseWriter, r *http.Request) {
@@ -40,7 +41,9 @@ func (handler *VisitHandler) visitDetail(w http.ResponseWriter, r *http.Request)
 	data := handler.NewTemplateData(r)
 	data.Form = &VisitDetailForm{
 		VisitDetail: visit,
+		VetPageSize: 3,
 	}
+	fmt.Println(data.Form)
 	handler.Render(w, r, http.StatusOK, "visit-detail.html", data)
 }
 

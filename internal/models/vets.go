@@ -152,7 +152,7 @@ func (model *VetModel) GetVetsByLastName(lastName string, page, pageSize int) ([
 		OFFSET ?
 	`
 
-	rows, err := model.DB.Query(stmt, lastName, page, pageSize)
+	rows, err := model.DB.Query(stmt, lastName, pageSize, page)
 	if err != nil {
 		return nil, err
 	}
