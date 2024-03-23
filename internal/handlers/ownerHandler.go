@@ -35,16 +35,16 @@ type ownerListForm struct {
 }
 
 func (handler *OwnerHandler) list(w http.ResponseWriter, r *http.Request) {
-	pageSizeInt := atoiWithDefault(r.URL.Query().Get("pageSize"), 10)
-	pageInt := atoiWithDefault(r.URL.Query().Get("pageSize"), 1)
+	pageSize := atoiWithDefault(r.URL.Query().Get("pageSize"), 5)
+	page := atoiWithDefault(r.URL.Query().Get("page"), 0)
 
-	pageLen, err := handler.Owners.GetOwnersPageLen(pageSizeInt)
+	pageLen, err := handler.Owners.GetOwnersPageLen(pageSize)
 	if err != nil {
 		handler.ServerError(w, r, err)
 		return
 	}
 
-	owners, err := handler.Owners.GetOwners(pageInt, pageSizeInt)
+	owners, err := handler.Owners.GetOwners(page, pageSize)
 	if err != nil {
 		handler.ServerError(w, r, err)
 		return

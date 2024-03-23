@@ -7,7 +7,7 @@ Vets
 
 <a href="/vet/create" class="btn btn-primary">Vet Create</a>
 
-<table class="table">
+<table id="vets-table" class="table">
     <thead>
         <tr>
             <th>Name</th>
@@ -33,10 +33,14 @@ Vets
     const pageLen = '{{ .Form.PageLen }}'
     const pageUl = document.getElementById('owner-pagination')
 
-    for (let i = 0; i <= pageLen; ++i) {
-        const page = `<li class="page-item"><a class="page-link" href="/vet?page=${i + 1}">${i + 1}</a></li>`
+    for (let i = 0; i < pageLen; ++i) {
+        const page = `
+        <li class="page-item">
+            <button class="page-link" hx-get="/vet?page=${i}" hx-select="#vets-table" hx-target="#vets-table">${i + 1}</button>
+        </li>`
         pageUl.insertAdjacentHTML('beforeend', page)
     }
 </script>
+
 
 {{ end }}

@@ -29,16 +29,16 @@ type vetListForm struct {
 
 func (handler *VetHandler) list(w http.ResponseWriter, r *http.Request) {
 
-	pageSizeInt := atoiWithDefault(r.URL.Query().Get("pageSize"), 10)
-	pageInt := atoiWithDefault(r.URL.Query().Get("page"), 1)
+	pageSize := atoiWithDefault(r.URL.Query().Get("pageSize"), 5)
+	page := atoiWithDefault(r.URL.Query().Get("page"), 0)
 
-	pageLen, err := handler.Vets.GetVetsPageLen(pageSizeInt)
+	pageLen, err := handler.Vets.GetVetsPageLen(pageSize)
 	if err != nil {
 		handler.ServerError(w, r, err)
 		return
 	}
 
-	vets, err := handler.Vets.GetVets(pageInt, pageSizeInt)
+	vets, err := handler.Vets.GetVets(page, pageSize)
 	if err != nil {
 		handler.ServerError(w, r, err)
 		return
@@ -235,5 +235,16 @@ func (handler *VetHandler) getByLastName(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	fmt.Println(vets)
+	pageLen, err := handler.Vets.GetVetsPageLen(pageSize)
+	if err != nil {
+		handler.ServerError(w, r, err)
+		return
+	}
+
+	data.Form = vetListForm{
+		PageLen: pageLen,
+		Vets:    vets,
+	}
+
+	handler.RenderPartial(w, r, http.StatusOK, "vet-list.html", data)
 }

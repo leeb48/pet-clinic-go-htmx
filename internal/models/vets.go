@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"math"
 
 	"pet-clinic.bonglee.com/internal/models/customErrors"
 )
@@ -56,15 +57,16 @@ func (model *VetModel) GetVetsPageLen(pageSize int) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+	pageLen := float64(rowCount) / float64(pageSize)
 
-	return rowCount / pageSize, nil
+	return int(math.Ceil(pageLen)), nil
 }
 
 func (model *VetModel) GetVets(page, pageSize int) ([]Vet, error) {
 
 	vets := []Vet{}
 
-	offset := (page - 1) * pageSize
+	offset := page * pageSize
 
 	stmt := `
 		SELECT id, firstName, lastName
