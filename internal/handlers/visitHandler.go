@@ -24,6 +24,7 @@ func NewVisitHandler(app *app.App) *VisitHandler {
 
 type VisitDetailForm struct {
 	VisitDetail models.VisitDetailDto
+	VisitJson   string
 	VetPageSize int
 }
 
@@ -38,12 +39,19 @@ func (handler *VisitHandler) visitDetail(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	visitJson, err := json.Marshal(visit)
+	if err != nil {
+		handler.ServerError(w, r, err)
+		return
+	}
+
 	data := handler.NewTemplateData(r)
 	data.Form = &VisitDetailForm{
 		VisitDetail: visit,
+		VisitJson:   string(visitJson),
 		VetPageSize: 3,
 	}
-	fmt.Println(data.Form)
+
 	handler.Render(w, r, http.StatusOK, "visit-detail.html", data)
 }
 
@@ -101,4 +109,28 @@ func (handler *VisitHandler) createVisitPost(w http.ResponseWriter, r *http.Requ
 
 	data.Alert = app.Alert{MsgType: alertConstants.SUCCESS, Msg: "Appointment created."}
 	handler.RenderPartial(w, r, http.StatusOK, "appt-form.html", data)
+}
+
+func (handler *VisitHandler) getVisitCalendarByVetId(w http.ResponseWriter, r *http.Request) {
+	params := httprouter.ParamsFromContext(r.Context())
+	vetId := atoiWithDefault(params.ByName("id"), 0)
+
+	visits, err := handler.Visits.GetByVetId(vetId)
+	if err != nil {
+		handler.ServerError(w, r, err)
+		return
+	}
+
+	visitJson, err := json.Marshal(visits)
+	if err != nil {
+		handler.ServerError(w, r, err)
+		return
+	}
+
+	data := handler.NewTemplateData(r)
+	data.Form = &VisitDetailForm{
+		VisitJson: string(visitJson),
+	}
+
+	handler.RenderPartial(w, r, http.StatusOK, "visit-calendar.html", data)
 }

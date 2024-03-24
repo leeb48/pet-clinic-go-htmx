@@ -1,0 +1,46 @@
+{{ define "title" }}
+Vets
+{{ end }}
+
+{{ define "main" }}
+<h1>Vets</h1>
+
+<a href="/vet/create" class="btn btn-primary">Vet Create</a>
+
+<div id="vet-table-pagination">
+    <table id="vets-table" class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{ range .Form.Vets }}
+            <tr>
+                <td>
+                    <a href="/vet/detail/{{ .Id }}" class="btn btn-outline-primary">{{ .FirstName }} {{ .LastName }}</a>
+                </td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+
+    {{ $pageSize := .Form.PageSize }}
+
+    <nav aria-label="Page navigation example">
+        <ul class="pagination" id="owner-pagination">
+            {{ range $i, $v := .Form.PageLen }}
+            <li class="page-item">
+                <button class="page-link" hx-get="/vet?page={{ $i }}&pageSize={{ $pageSize }}" hx-select="#vets-table"
+                    hx-target="#vets-table">
+                    {{ add $i 1 }}
+                </button>
+            </li>
+            {{ end }}
+        </ul>
+    </nav>
+
+</div>
+
+
+{{ end }}

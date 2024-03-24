@@ -47,6 +47,7 @@ func Routes(app *app.App) *httprouter.Router {
 	visitHandler := NewVisitHandler(app)
 	router.Handler(http.MethodGet, "/visit/detail/:id", dynamic.ThenFunc(visitHandler.visitDetail))
 	router.Handler(http.MethodPost, "/visit/create", dynamic.ThenFunc(visitHandler.createVisitPost))
+	router.Handler(http.MethodGet, "/visit/vetId/:id", dynamic.ThenFunc(visitHandler.getVisitCalendarByVetId))
 
 	return router
 }

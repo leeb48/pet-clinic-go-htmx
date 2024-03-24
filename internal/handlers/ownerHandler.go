@@ -30,7 +30,7 @@ func (handler *OwnerHandler) home(w http.ResponseWriter, r *http.Request) {
 }
 
 type ownerListForm struct {
-	PageLen int
+	PageLen []int
 	Owners  []models.Owner
 }
 
@@ -52,7 +52,7 @@ func (handler *OwnerHandler) list(w http.ResponseWriter, r *http.Request) {
 
 	data := handler.NewTemplateData(r)
 	data.Form = ownerListForm{
-		PageLen: pageLen,
+		PageLen: make([]int, pageLen),
 		Owners:  owners,
 	}
 	handler.Render(w, r, http.StatusOK, "owner-list.html", data)

@@ -33,6 +33,13 @@ Owners
 </table>
 <nav aria-label="Page navigation example">
     <ul class="pagination" id="owner-pagination">
+        {{ range $i, $v := .Form.PageLen }}
+        <li class="page-item">
+            <button class="page-link" hx-get="/owner?page={{ $i }}" hx-select="#owner-table" hx-target="#owner-table">
+                {{ add $i 1}}
+            </button>
+        </li>
+        {{ end }}
     </ul>
 </nav>
 

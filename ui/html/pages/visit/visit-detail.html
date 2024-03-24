@@ -6,6 +6,8 @@ Visit Detail
 
 <hr />
 
+<h1>Visit Detail</h1>
+
 {{ with .Form }}
 
 <div id="alert"></div>
@@ -29,8 +31,10 @@ Visit Detail
                 </div>
                 <div class="card mb-4">
                     <div class="card-body text-center">
-                        <form class="mt-2" hx-post="/vet/search?pageSize={{ .VetPageSize }}" hx-target="#vetList"
-                            hx-target-4*="#alert" hx-target-5*="#alert">
+
+                        <form class="mt-2" hx-post="/vet/search?pageSize={{ .VetPageSize }}"
+                            hx-select="#vet-table-pagination" hx-target="#vetList" hx-target-4*="#alert"
+                            hx-target-5*="#alert">
                             <div class="input-group mb-3">
                                 <span class="input-group-text">Last Name</span>
                                 <input type="text" class="form-control" placeholder="Last Name" aria-label="Last Name"
@@ -69,6 +73,7 @@ Visit Detail
 
                         <div class="row">
                             <div id='calendar'></div>
+                            <div id="visitListData"></div>
                         </div>
                     </div>
                 </div>
@@ -102,7 +107,11 @@ Visit Detail
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js'></script>
 <script type="text/javascript" src="/static/js/renderCalendar.js"></script>
 <script>
-    renderCalendar()
+    renderCalendar(JSON.parse('[{{ .Form.VisitJson }}]'))
+    document.addEventListener('htmx:configRequest', (event) => {
+        const visitJsonEle = document.getElementById('test')
+        console.log(visitJsonEle)
+    })
 </script>
 
 {{ end }}

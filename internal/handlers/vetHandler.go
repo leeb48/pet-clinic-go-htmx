@@ -23,8 +23,9 @@ func NewVetHandler(app *app.App) *VetHandler {
 }
 
 type vetListForm struct {
-	PageLen int
-	Vets    []models.Vet
+	PageLen  []int
+	PageSize int
+	Vets     []models.Vet
 }
 
 func (handler *VetHandler) list(w http.ResponseWriter, r *http.Request) {
@@ -46,11 +47,12 @@ func (handler *VetHandler) list(w http.ResponseWriter, r *http.Request) {
 
 	data := handler.NewTemplateData(r)
 	data.Form = vetListForm{
-		PageLen: pageLen,
-		Vets:    vets,
+		PageLen:  make([]int, pageLen),
+		PageSize: pageSize,
+		Vets:     vets,
 	}
 
-	handler.Render(w, r, http.StatusOK, "vet-list.html", data)
+	handler.Render(w, r, http.StatusOK, "vet-list-link.html", data)
 }
 
 type vetDetailForm struct {
@@ -242,9 +244,10 @@ func (handler *VetHandler) getByLastName(w http.ResponseWriter, r *http.Request)
 	}
 
 	data.Form = vetListForm{
-		PageLen: pageLen,
-		Vets:    vets,
+		PageLen:  make([]int, pageLen),
+		PageSize: pageSize,
+		Vets:     vets,
 	}
 
-	handler.RenderPartial(w, r, http.StatusOK, "vet-list.html", data)
+	handler.RenderPartial(w, r, http.StatusOK, "vet-list-side.html", data)
 }
