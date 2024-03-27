@@ -110,7 +110,8 @@ Visit Detail
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-outline-danger" hx-delete="/visit">Remove</button>
+                <button type="button" class="btn btn-outline-danger"
+                    hx-delete="/visit/{{ .VisitDetail.Id }}/vetId/{{ .VisitDetail.VetId }}">Remove</button>
             </div>
         </div>
     </div>

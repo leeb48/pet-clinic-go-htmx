@@ -25,3 +25,8 @@ func (model *VisitModel) GetById(visitId int) (models.VisitDetailDto, error) {
 
 	return visit, nil
 }
+
+func (model *VisitModel) Remove(visitId int) error {
+
+	return nil
+}

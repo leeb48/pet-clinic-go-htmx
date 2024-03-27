@@ -41,6 +41,7 @@ type VisitModelInterface interface {
 	Create(petId, vetId int, appt time.Time, visitReason string, duration int) error
 	GetByVetId(vetId int) ([]VisitDetailDto, error)
 	GetById(visitId int) (VisitDetailDto, error)
+	Remove(visitId int) error
 }
 
 type VisitModel struct {
@@ -142,4 +143,19 @@ func (model *VisitModel) GetById(visitId int) (VisitDetailDto, error) {
 	}
 
 	return visit, nil
+}
+
+func (model *VisitModel) Remove(visitId int) error {
+
+	stmt := `
+		DELETE FROM visits
+		WHERE id = ?
+	`
+
+	_, err := model.DB.Exec(stmt, visitId)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

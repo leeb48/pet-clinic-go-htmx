@@ -134,3 +134,18 @@ func (handler *VisitHandler) getVisitCalendarByVetId(w http.ResponseWriter, r *h
 
 	handler.RenderPartial(w, r, http.StatusOK, "visit-calendar.html", data)
 }
+
+func (handler *VisitHandler) removeVisit(w http.ResponseWriter, r *http.Request) {
+	params := httprouter.ParamsFromContext(r.Context())
+	visitId := atoiWithDefault(params.ByName("visitId"), 0)
+	vetId := atoiWithDefault(params.ByName("vetId"), 0)
+
+	err := handler.Visits.Remove(visitId)
+	if err != nil {
+		handler.ServerError(w, r, err)
+		return
+	}
+
+	handler.Session.Put(r.Context(), alertConstants.FLASH_MSG, "Visit removed")
+	w.Header().Add("HX-Redirect", fmt.Sprintf("/vet/detail/%v", vetId))
+}
