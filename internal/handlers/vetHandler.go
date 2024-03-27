@@ -32,6 +32,7 @@ func (handler *VetHandler) list(w http.ResponseWriter, r *http.Request) {
 
 	pageSize := atoiWithDefault(r.URL.Query().Get("pageSize"), 5)
 	page := atoiWithDefault(r.URL.Query().Get("page"), 0)
+	isSideList := r.URL.Query().Get("sideList") == "true"
 
 	pageLen, err := handler.Vets.GetVetsPageLen(pageSize)
 	if err != nil {
@@ -50,6 +51,11 @@ func (handler *VetHandler) list(w http.ResponseWriter, r *http.Request) {
 		PageLen:  make([]int, pageLen),
 		PageSize: pageSize,
 		Vets:     vets,
+	}
+
+	if isSideList {
+		handler.RenderPartial(w, r, http.StatusOK, "vet-list-side.html", data)
+		return
 	}
 
 	handler.Render(w, r, http.StatusOK, "vet-list-link.html", data)

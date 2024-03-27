@@ -51,6 +51,7 @@ Visit Detail
             <div class="col-lg-8">
                 <div class="card mb-4">
                     <div class="card-body">
+
                         <div class="row">
                             <div class="col-sm-3">
                                 <p class="mb-0">Pet Type</p>
@@ -59,13 +60,28 @@ Visit Detail
                                 <p class="text-muted mb-0">{{ .VisitDetail.PetType }}</p>
                             </div>
                         </div>
+
                         <hr>
+
                         <div class="row">
                             <div class="col-sm-3">
                                 <p class="mb-0">Visit Reason</p>
                             </div>
                             <div class="col-sm-9">
                                 <p class="text-muted mb-0">{{ .VisitDetail.VisitReason }}</p>
+                            </div>
+                        </div>
+
+                        <hr />
+
+                        <div class="row">
+                            <div class="col-sm-3">
+                                <p class="mb-0">Vet Name</p>
+                            </div>
+                            <div class="col-sm-9">
+                                <p class="text-muted mb-0">
+                                    {{ .VisitDetail.VetFirstName }} {{ .VisitDetail.VetLastName }}
+                                </p>
                             </div>
                         </div>
 
@@ -108,9 +124,11 @@ Visit Detail
 <script type="text/javascript" src="/static/js/renderCalendar.js"></script>
 <script>
     renderCalendar(JSON.parse('[{{ .Form.VisitJson }}]'))
-    document.addEventListener('htmx:configRequest', (event) => {
-        const visitJsonEle = document.getElementById('test')
-        console.log(visitJsonEle)
+    document.addEventListener('htmx:afterSwap', (event) => {
+        const visitJsonEle = document.getElementById('visitJson')
+        if (visitJsonEle?.value) {
+            renderCalendar(JSON.parse(visitJsonEle.value))
+        }
     })
 </script>
 
