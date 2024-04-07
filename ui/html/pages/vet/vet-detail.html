@@ -53,10 +53,10 @@ Vet Detail
                             <div class="input-group mb-3">
                                 <span class="input-group-text">Pet Name</span>
                                 <input type="text" class="form-control" placeholder="Pet Name" aria-label="Pet Name"
-                                    name="name" aria-describedby="petName" value="Mangss">
+                                    name="name" aria-describedby="petName" value="">
                                 <span class="input-group-text">Birthdate</span>
                                 <input type="date" class="form-control" aria-label="Birthdate" name="birthdate"
-                                    aria-describedby="birthdate" value="1234-12-12">
+                                    aria-describedby="birthdate" value="">
                                 <button class="btn btn-outline-success" type="submit">Search</button>
                             </div>
                         </form>
@@ -129,7 +129,7 @@ Vet Detail
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        renderCalendar(JSON.parse('{{ .Form.Visits }}'))
+        renderCalendar(JSON.parse('{{ .Form.VisitsJson }}'))
     });
 
     document.addEventListener('htmx:afterSwap', (event) => {

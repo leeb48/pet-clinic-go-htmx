@@ -57,29 +57,8 @@ func (handler *VisitHandler) visitDetail(w http.ResponseWriter, r *http.Request)
 
 type createVisitForm struct {
 	models.CreateVisitDto `json:"visit"`
-	Visits                string
-	VetPageSize           int
+	VisitsJson            string
 	validator.Validator   `form:"-"`
-}
-
-func (handler *VisitHandler) editVisitPage(w http.ResponseWriter, r *http.Request) {
-
-	params := httprouter.ParamsFromContext(r.Context())
-	visitId := atoiWithDefault(params.ByName("id"), 0)
-
-	visit, err := handler.Visits.GetById(visitId)
-	if err != nil {
-		handler.ServerError(w, r, err)
-		return
-	}
-
-	data := handler.NewTemplateData(r)
-	data.Form = &VisitDetailForm{
-		VisitDetail: visit,
-		VetPageSize: 3,
-	}
-
-	handler.Render(w, r, http.StatusOK, "visit-edit.html", data)
 }
 
 func (handler *VisitHandler) createVisitPost(w http.ResponseWriter, r *http.Request) {
@@ -125,7 +104,7 @@ func (handler *VisitHandler) createVisitPost(w http.ResponseWriter, r *http.Requ
 	}
 
 	data.Form = &createVisitForm{
-		Visits: string(visitsJson),
+		VisitsJson: string(visitsJson),
 	}
 
 	data.Alert = app.Alert{MsgType: alertConstants.SUCCESS, Msg: "Appointment created."}
@@ -169,4 +148,60 @@ func (handler *VisitHandler) removeVisit(w http.ResponseWriter, r *http.Request)
 
 	handler.Session.Put(r.Context(), alertConstants.FLASH_MSG, "Visit removed")
 	w.Header().Add("HX-Redirect", fmt.Sprintf("/vet/detail/%v", vetId))
+}
+
+func (handler *VisitHandler) editVisitPage(w http.ResponseWriter, r *http.Request) {
+
+	params := httprouter.ParamsFromContext(r.Context())
+	visitId := atoiWithDefault(params.ByName("id"), 0)
+
+	visit, err := handler.Visits.GetById(visitId)
+	if err != nil {
+		handler.ServerError(w, r, err)
+		return
+	}
+
+	fmt.Println(visit)
+
+	visitJson, err := json.Marshal(visit)
+	if err != nil {
+		handler.ServerError(w, r, err)
+		return
+	}
+
+	data := handler.NewTemplateData(r)
+	data.Form = &VisitDetailForm{
+		VisitDetail: visit,
+		VisitJson:   string(visitJson),
+	}
+
+	handler.Render(w, r, http.StatusOK, "visit-edit.html", data)
+}
+
+type editVisitForm struct {
+	models.EditVisitDto `json:"visit"`
+}
+
+func (handler *VisitHandler) editVisitPut(w http.ResponseWriter, r *http.Request) {
+	var form editVisitForm
+
+	data := handler.NewTemplateData(r)
+
+	err := json.NewDecoder(r.Body).Decode(&form)
+	if err != nil {
+		handler.Logger.Error(err.Error())
+		data.Alert = app.Alert{MsgType: alertConstants.DANGER, Msg: err.Error()}
+		handler.RenderPartial(w, r, http.StatusBadRequest, "alert.html", data)
+		return
+	}
+
+	err = handler.Visits.Edit(form.VisitId, form.VetId, form.Appointment, form.VisitReason, form.Duration)
+	if err != nil {
+		handler.Logger.Error(err.Error())
+		handler.ServerError(w, r, err)
+		return
+	}
+
+	handler.Session.Put(r.Context(), alertConstants.FLASH_MSG, "Visit updated")
+	w.Header().Add("HX-Redirect", fmt.Sprintf("/visit/detail/%v", form.VisitId))
 }

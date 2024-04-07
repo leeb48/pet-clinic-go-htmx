@@ -65,10 +65,10 @@ func (handler *VetHandler) list(w http.ResponseWriter, r *http.Request) {
 }
 
 type vetDetailForm struct {
-	Id        int
-	FirstName string
-	LastName  string
-	Visits    string
+	Id         int
+	FirstName  string
+	LastName   string
+	VisitsJson string
 }
 
 func (handler *VetHandler) detail(w http.ResponseWriter, r *http.Request) {
@@ -96,10 +96,10 @@ func (handler *VetHandler) detail(w http.ResponseWriter, r *http.Request) {
 
 	data := handler.NewTemplateData(r)
 	data.Form = vetDetailForm{
-		Id:        vet.Id,
-		FirstName: vet.FirstName,
-		LastName:  vet.LastName,
-		Visits:    string(visitsJson),
+		Id:         vet.Id,
+		FirstName:  vet.FirstName,
+		LastName:   vet.LastName,
+		VisitsJson: string(visitsJson),
 	}
 
 	handler.Render(w, r, http.StatusOK, "vet-detail.html", data)

@@ -9,7 +9,7 @@
         </thead>
         <tbody>
             {{ range .Form.Vets }}
-            <tr class="vet_row">
+            <tr class="vet_row" data-vet-id="{{ .Id }}">
                 <td>
                     <button class="btn btn-outline-primary" onClick="selectVet(this)" hx-get="/visit/vetId/{{ .Id }}"
                         hx-target="#visitListData">

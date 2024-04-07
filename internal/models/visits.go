@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 )
 
@@ -17,6 +18,14 @@ type Visit struct {
 
 type CreateVisitDto struct {
 	PetId       int       `json:"petId"`
+	VetId       int       `json:"vetId"`
+	Appointment time.Time `json:"appointment"`
+	VisitReason string    `json:"visitReason"`
+	Duration    int       `json:"duration"`
+}
+
+type EditVisitDto struct {
+	VisitId     int       `json:"visitId"`
 	VetId       int       `json:"vetId"`
 	Appointment time.Time `json:"appointment"`
 	VisitReason string    `json:"visitReason"`
@@ -41,6 +50,7 @@ type VisitModelInterface interface {
 	Create(petId, vetId int, appt time.Time, visitReason string, duration int) error
 	GetByVetId(vetId int) ([]VisitDetailDto, error)
 	GetById(visitId int) (VisitDetailDto, error)
+	Edit(visitId, vetId int, appt time.Time, visitReason string, duration int) error
 	Remove(visitId int) error
 }
 
@@ -153,6 +163,28 @@ func (model *VisitModel) Remove(visitId int) error {
 	`
 
 	_, err := model.DB.Exec(stmt, visitId)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (model *VisitModel) Edit(visitId, vetId int, appt time.Time, visitReason string, duration int) error {
+
+	stmt := `
+		UPDATE
+			visits
+		SET
+			vetId = COALESCE(NULLIF(?, ''), vetId),
+			appointment = COALESCE(NULLIF(?, ''), appointment),
+			visitReason = COALESCE(NULLIF(?, ''), visitReason),
+			duration = COALESCE(NULLIF(?, ''), duration)
+		WHERE
+			id = ?;
+	`
+	fmt.Println(visitId)
+	_, err := model.DB.Exec(stmt, vetId, appt, visitReason, duration, visitId)
 	if err != nil {
 		return err
 	}

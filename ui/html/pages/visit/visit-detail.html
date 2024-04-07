@@ -37,9 +37,10 @@ Visit Detail
                             hx-include="[name='lastName']" hx-select="#vet-table-pagination" hx-target="#vetList"
                             hx-target-4*="#alert" hx-target-5*="#alert">
                             <div class="input-group mb-3">
+                                <legend>Veterinarian Search</legend>
                                 <span class="input-group-text">Last Name</span>
                                 <input type="text" class="form-control" placeholder="Last Name" aria-label="Last Name"
-                                    name="lastName" aria-describedby="lastName" value="Lee">
+                                    name="lastName" aria-describedby="lastName" value="">
                                 <button class="btn btn-outline-success" type="submit">Search</button>
                             </div>
                         </form>
@@ -52,6 +53,13 @@ Visit Detail
             <div class="col-lg-8">
                 <div class="card mb-4">
                     <div class="card-body">
+
+                        <div class="row">
+                            <div id='calendar'></div>
+                            <div id="visitListData"></div>
+                        </div>
+
+                        <hr />
 
                         <div class="row">
                             <div class="col-sm-3">
@@ -86,12 +94,6 @@ Visit Detail
                             </div>
                         </div>
 
-                        <hr />
-
-                        <div class="row">
-                            <div id='calendar'></div>
-                            <div id="visitListData"></div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -127,13 +129,6 @@ Visit Detail
 
 <script>
     renderCalendar(JSON.parse('[{{ .Form.VisitJson }}]'))
-
-    document.addEventListener('htmx:afterSwap', (event) => {
-        const visitJsonEle = document.getElementById('visitJson')
-        if (visitJsonEle?.value) {
-            renderCalendar(JSON.parse(visitJsonEle.value))
-        }
-    })
 </script>
 
 {{ end }}

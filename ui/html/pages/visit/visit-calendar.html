@@ -1,3 +1,5 @@
 {{ define "main" }}
-<input type="hidden" id="visitJson" value="{{ .Form.VisitJson }}">
+<script>
+    renderCalendar(JSON.parse("{{ .Form.VisitJson }}"))
+</script>
 {{ end }}

@@ -14,6 +14,10 @@ func (model *VisitModel) Create(petId, vetId int, appt time.Time, visitReason st
 	return nil
 }
 
+func (model *VisitModel) Edit(visitId, vetId int, appt time.Time, visitReason string, duration int) error {
+	return nil
+}
+
 func (model *VisitModel) GetByVetId(vetId int) ([]models.VisitDetailDto, error) {
 	visits := []models.VisitDetailDto{}
 
