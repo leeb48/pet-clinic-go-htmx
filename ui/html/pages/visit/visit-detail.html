@@ -22,7 +22,8 @@ Visit Detail
                         <h5 class="my-3">{{ .VisitDetail.PetName }}</h5>
                         <p class="text-muted mb-4">{{ .VisitDetail.PetBirthdate | birthdate }}</p>
                         <div class="d-flex justify-content-center mb-2">
-                            <a href="/visit/edit/" type="button" class="btn btn-primary ms-2">Edit</a>
+                            <a href="/visit/edit/{{ .VisitDetail.Id }}" type="button"
+                                class="btn btn-primary ms-2">Edit</a>
                             <button type="button" class="btn btn-outline-danger ms-2" data-bs-toggle="modal"
                                 data-bs-target="#removeOwnerModal">Remove</button>
                         </div>
@@ -32,9 +33,9 @@ Visit Detail
                 <div class="card mb-4">
                     <div class="card-body text-center">
 
-                        <form class="mt-2" hx-post="/vet/search?pageSize={{ .VetPageSize }}"
-                            hx-select="#vet-table-pagination" hx-target="#vetList" hx-target-4*="#alert"
-                            hx-target-5*="#alert">
+                        <form class="mt-2" hx-get="/vet/search?pageSize={{ .VetPageSize }}"
+                            hx-include="[name='lastName']" hx-select="#vet-table-pagination" hx-target="#vetList"
+                            hx-target-4*="#alert" hx-target-5*="#alert">
                             <div class="input-group mb-3">
                                 <span class="input-group-text">Last Name</span>
                                 <input type="text" class="form-control" placeholder="Last Name" aria-label="Last Name"
@@ -123,8 +124,10 @@ Visit Detail
 
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js'></script>
 <script type="text/javascript" src="/static/js/renderCalendar.js"></script>
+
 <script>
     renderCalendar(JSON.parse('[{{ .Form.VisitJson }}]'))
+
     document.addEventListener('htmx:afterSwap', (event) => {
         const visitJsonEle = document.getElementById('visitJson')
         if (visitJsonEle?.value) {

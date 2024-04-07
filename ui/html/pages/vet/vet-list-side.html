@@ -22,12 +22,14 @@
     </table>
 
     {{ $pageSize := .Form.PageSize }}
+    {{ $lastName := .Form.LastName }}
 
     <nav aria-label="Page navigation example">
         <ul class="pagination" id="owner-pagination">
             {{ range $i, $v := .Form.PageLen }}
             <li class="page-item">
-                <button class="page-link" hx-get="/vet?page={{ $i }}&pageSize={{ $pageSize }}&sideList=true"
+                <button class="page-link"
+                    hx-get="/vet/search?page={{ $i }}&pageSize={{ $pageSize }}&lastName={{ $lastName }}"
                     hx-select="#vets-table" hx-target="#vets-table">
                     {{ add $i 1 }}
                 </button>

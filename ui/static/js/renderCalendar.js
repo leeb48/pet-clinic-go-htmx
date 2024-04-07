@@ -2,14 +2,19 @@ function renderCalendar(visits = []) {
     const events = []
 
     for (const visit of visits) {
-        const startTime = new Date(visit.appointment)
+        const appointment = new Date(visit.appointment)
+
+        const startTime = appointment.toISOString()
+        const endTime = new Date(appointment.setHours(appointment.getHours() + visit.duration)).toISOString()
+
         events.push({
             title: visit.petName,
             start: startTime,
-            end: startTime.setHours(startTime.getHours() + visit.duration),
+            end: endTime,
             visitId: visit.id
         })
     }
+
 
     const calendarEl = document.getElementById('calendar');
     const calendar = new FullCalendar.Calendar(calendarEl, {

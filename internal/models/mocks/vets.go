@@ -10,7 +10,7 @@ func (model *VetModel) Insert(firstName, lastName string) (int, error) {
 	return 0, nil
 }
 
-func (model *VetModel) GetVetsPageLen(pageSize int) (int, error) {
+func (model *VetModel) GetAllVetsPageLen(pageSize int) (int, error) {
 
 	return 1, nil
 }
@@ -42,4 +42,8 @@ func (model *VetModel) GetVetsByLastName(lastName string, page, pageSize int) ([
 	vets := []models.Vet{}
 
 	return vets, nil
+}
+
+func (model *VetModel) GetVetsPageLenLastName(pageSize int, lastName string) (int, error) {
+	return 0, nil
 }

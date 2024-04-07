@@ -42,10 +42,11 @@ func Routes(app *app.App) *httprouter.Router {
 	router.Handler(http.MethodGet, "/vet/edit/:id", dynamic.ThenFunc(vetHandler.edit))
 	router.Handler(http.MethodPut, "/vet/edit/:id", dynamic.ThenFunc(vetHandler.editPost))
 	router.Handler(http.MethodDelete, "/vet/:id", dynamic.ThenFunc(vetHandler.remove))
-	router.Handler(http.MethodPost, "/vet/search", dynamic.ThenFunc(vetHandler.getByLastName))
+	router.Handler(http.MethodGet, "/vet/search", dynamic.ThenFunc(vetHandler.getByLastName))
 
 	visitHandler := NewVisitHandler(app)
 	router.Handler(http.MethodGet, "/visit/detail/:id", dynamic.ThenFunc(visitHandler.visitDetail))
+	router.Handler(http.MethodGet, "/visit/edit/:id", dynamic.ThenFunc(visitHandler.editVisitPage))
 	router.Handler(http.MethodPost, "/visit/create", dynamic.ThenFunc(visitHandler.createVisitPost))
 	router.Handler(http.MethodGet, "/visit/vetId/:id", dynamic.ThenFunc(visitHandler.getVisitCalendarByVetId))
 	router.Handler(http.MethodDelete, "/visit/:visitId/vetId/:vetId", dynamic.ThenFunc(visitHandler.removeVisit))

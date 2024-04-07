@@ -46,11 +46,17 @@ func add(x, y int) int {
 	return x + y
 }
 
+func toDateTime(dateTime time.Time) string {
+	parsedTime := dateTime.Local().Format(time.DateTime)
+	return parsedTime
+}
+
 var functions = template.FuncMap{
 	"phoneNumber": phoneNumber,
 	"birthdate":   birthDate,
 	"YYYYMMDD":    YYYYMMDD,
 	"add":         add,
+	"toDateTime":  toDateTime,
 }
 
 func CreateTemplateCache() (map[string]*template.Template, error) {

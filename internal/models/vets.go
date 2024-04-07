@@ -15,7 +15,8 @@ type Vet struct {
 
 type VetModelInterface interface {
 	Insert(firstName, lastName string) (int, error)
-	GetVetsPageLen(pageSize int) (int, error)
+	GetAllVetsPageLen(pageSize int) (int, error)
+	GetVetsPageLenLastName(pageSize int, lastName string) (int, error)
 	GetVets(page, pageSize int) ([]Vet, error)
 	GetById(id int) (Vet, error)
 	Update(id int, firstName, lastName string) error
@@ -45,7 +46,7 @@ func (model *VetModel) Insert(firstName, lastName string) (int, error) {
 	return int(vetId), nil
 }
 
-func (model *VetModel) GetVetsPageLen(pageSize int) (int, error) {
+func (model *VetModel) GetAllVetsPageLen(pageSize int) (int, error) {
 
 	stmt := `
 		SELECT COUNT(*) FROM vets
@@ -53,6 +54,23 @@ func (model *VetModel) GetVetsPageLen(pageSize int) (int, error) {
 	var rowCount int
 
 	err := model.DB.QueryRow(stmt).Scan(&rowCount)
+
+	if err != nil {
+		return 0, err
+	}
+	pageLen := float64(rowCount) / float64(pageSize)
+
+	return int(math.Ceil(pageLen)), nil
+}
+
+func (model *VetModel) GetVetsPageLenLastName(pageSize int, lastName string) (int, error) {
+	stmt := `
+		SELECT COUNT(*) FROM vets
+		WHERE lastName = ?
+	`
+	var rowCount int
+
+	err := model.DB.QueryRow(stmt, lastName).Scan(&rowCount)
 
 	if err != nil {
 		return 0, err

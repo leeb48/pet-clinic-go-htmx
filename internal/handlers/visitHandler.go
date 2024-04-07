@@ -58,7 +58,28 @@ func (handler *VisitHandler) visitDetail(w http.ResponseWriter, r *http.Request)
 type createVisitForm struct {
 	models.CreateVisitDto `json:"visit"`
 	Visits                string
+	VetPageSize           int
 	validator.Validator   `form:"-"`
+}
+
+func (handler *VisitHandler) editVisitPage(w http.ResponseWriter, r *http.Request) {
+
+	params := httprouter.ParamsFromContext(r.Context())
+	visitId := atoiWithDefault(params.ByName("id"), 0)
+
+	visit, err := handler.Visits.GetById(visitId)
+	if err != nil {
+		handler.ServerError(w, r, err)
+		return
+	}
+
+	data := handler.NewTemplateData(r)
+	data.Form = &VisitDetailForm{
+		VisitDetail: visit,
+		VetPageSize: 3,
+	}
+
+	handler.Render(w, r, http.StatusOK, "visit-edit.html", data)
 }
 
 func (handler *VisitHandler) createVisitPost(w http.ResponseWriter, r *http.Request) {

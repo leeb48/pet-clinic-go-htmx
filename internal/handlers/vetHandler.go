@@ -26,15 +26,18 @@ type vetListForm struct {
 	PageLen  []int
 	PageSize int
 	Vets     []models.Vet
+	LastName string
 }
 
 func (handler *VetHandler) list(w http.ResponseWriter, r *http.Request) {
 
-	pageSize := atoiWithDefault(r.URL.Query().Get("pageSize"), 5)
-	page := atoiWithDefault(r.URL.Query().Get("page"), 0)
-	isSideList := r.URL.Query().Get("sideList") == "true"
+	query := r.URL.Query()
 
-	pageLen, err := handler.Vets.GetVetsPageLen(pageSize)
+	pageSize := atoiWithDefault(query.Get("pageSize"), 5)
+	page := atoiWithDefault(query.Get("page"), 0)
+	isSideList := query.Get("sideList") == "true"
+
+	pageLen, err := handler.Vets.GetAllVetsPageLen(pageSize)
 	if err != nil {
 		handler.ServerError(w, r, err)
 		return
@@ -213,29 +216,17 @@ func (handler *VetHandler) remove(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("HX-Redirect", "/vet")
 }
 
-type searchVetForm struct {
-	LastName string `json:"lastName"`
-}
-
 func (handler *VetHandler) getByLastName(w http.ResponseWriter, r *http.Request) {
 
-	params := httprouter.ParamsFromContext(r.Context())
-	page := atoiWithDefault(params.ByName("page"), 0)
-	pageSize := atoiWithDefault(params.ByName("pageSize"), 3)
+	query := r.URL.Query()
 
-	var form searchVetForm
+	page := atoiWithDefault(query.Get("page"), 0)
+	pageSize := atoiWithDefault(query.Get("pageSize"), 3)
+	lastName := query.Get("lastName")
 
 	data := handler.NewTemplateData(r)
 
-	err := json.NewDecoder(r.Body).Decode(&form)
-	if err != nil {
-		handler.Logger.Error(err.Error())
-		data.Alert = app.Alert{MsgType: alertConstants.DANGER, Msg: "Error while parsing search data."}
-		handler.RenderPartial(w, r, http.StatusBadRequest, "alert.html", data)
-		return
-	}
-
-	vets, err := handler.Vets.GetVetsByLastName(form.LastName, page, pageSize)
+	vets, err := handler.Vets.GetVetsByLastName(lastName, page, pageSize)
 	if err != nil {
 		handler.Logger.Error(err.Error())
 		data.Alert = app.Alert{MsgType: alertConstants.DANGER, Msg: "Error while searching vets."}
@@ -243,7 +234,7 @@ func (handler *VetHandler) getByLastName(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	pageLen, err := handler.Vets.GetVetsPageLen(pageSize)
+	pageLen, err := handler.Vets.GetVetsPageLenLastName(pageSize, lastName)
 	if err != nil {
 		handler.ServerError(w, r, err)
 		return
@@ -253,6 +244,7 @@ func (handler *VetHandler) getByLastName(w http.ResponseWriter, r *http.Request)
 		PageLen:  make([]int, pageLen),
 		PageSize: pageSize,
 		Vets:     vets,
+		LastName: lastName,
 	}
 
 	handler.RenderPartial(w, r, http.StatusOK, "vet-list-side.html", data)

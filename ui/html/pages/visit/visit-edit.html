@@ -1,0 +1,149 @@
+{{ define "title" }}
+Visit Edit
+{{ end }}
+
+{{ define "main" }}
+
+{{ with .Form }}
+
+<div id="alert"></div>
+
+<section style="background-color: #eee;">
+    <div class="container py-5">
+
+        <div class="row">
+            <div class="col-lg-4">
+
+                <div class="card mb-4">
+                    <div class="card-body text-center">
+
+                        <form class="mt-2" hx-get="/vet/search?pageSize={{ .VetPageSize }}"
+                            hx-include="[name='lastName']" hx-select="#vet-table-pagination" hx-target="#vetList"
+                            hx-target-4*="#alert" hx-target-5*="#alert">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">Last Name</span>
+                                <input type="text" class="form-control" placeholder="Last Name" aria-label="Last Name"
+                                    name="lastName" aria-describedby="lastName" value="{{ .VisitDetail.VetLastName }}">
+                                <button id="vet-search-btn" class="btn btn-outline-success"
+                                    type="submit">Search</button>
+                            </div>
+                        </form>
+
+                    </div>
+                    <div id="vetList"></div>
+                </div>
+
+            </div>
+            <div class="col-lg-8">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div id='calendar'></div>
+                            <form class="mt-2" hx-post="/visit/create" id="appt-form" hx-target-4x="#alert"
+                                hx-target-5x="body">
+                                <div class="input-group">
+                                    <span class="input-group-text">Appt</span>
+                                    <input class="form-control w-auto" type="datetime-local" name="appointment"
+                                        value="{{ .VisitDetail.Appointment | toDateTime }}">
+                                    <span class="input-group-text">Hour</span>
+                                    <input class="form-control w-10" type="number" name="duration"
+                                        value="{{ .VisitDetail.Duration }}">
+                                    <button class="btn btn-outline-primary" type="submit">Create</button>
+                                </div>
+                                <div class="input-group mt-2">
+                                    <span class="input-group-text">Reason for visit</span>
+                                    <textarea name="visitReason" class="form-control"
+                                        aria-label="With textarea">{{ .VisitDetail.VisitReason }}</textarea>
+                                </div>
+                            </form>
+
+                            <form class="mt-2" hx-post="/pet/search" hx-target="#petList" hx-target-4*="#alert"
+                                hx-target-5x="body">
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text">Pet Name</span>
+                                    <input type="text" class="form-control" placeholder="Pet Name" aria-label="Pet Name"
+                                        name="name" aria-describedby="petName" value="Mangss">
+                                    <span class="input-group-text">Birthdate</span>
+                                    <input type="date" class="form-control" aria-label="Birthdate" name="birthdate"
+                                        aria-describedby="birthdate" value="1234-12-12">
+                                    <button class="btn btn-outline-success" type="submit">Search</button>
+                                </div>
+                            </form>
+
+                            <div class="" id="petList"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</section>
+
+
+{{ end }}
+
+<hr />
+
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js'></script>
+<script type="text/javascript" src="/static/js/renderCalendar.js"></script>
+<script>
+    renderCalendar()
+    document.addEventListener('htmx:afterSwap', (event) => {
+    })
+</script>
+
+<script>
+
+    document.addEventListener('htmx:configRequest', (event) => {
+        params = event.detail.parameters
+
+        const pathMapping = {
+            '/pet/search': petSearch,
+            '/visit/create': createVisit,
+        }
+
+        const requestFunc = pathMapping[event.detail.path]
+        requestFunc && requestFunc(params)
+    })
+
+    function petSearch(params) {
+        if (params.birthdate) {
+            params.birthdate = new Date(params.birthdate).toISOString()
+        }
+    }
+
+    function createVisit(params) {
+        if (params.appointment) {
+            params.appointment = new Date(params.appointment).toISOString()
+        }
+
+        const selectedPet = document.querySelector('.pet_row.table-success')
+
+        params.visit = {
+            appointment: params.appointment,
+            visitReason: params.visitReason,
+            petId: Number(selectedPet?.dataset?.petId),
+            vetId: 1,
+            duration: Number(params.duration),
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('vet-search-btn').click();
+        renderCalendar()
+    });
+
+    document.addEventListener('htmx:afterSwap', (event) => {
+        const elt = event.detail.elt
+        if (elt.id === 'alert') {
+            for (let alert of document.querySelectorAll('#alert')) {
+                setTimeout(() => {
+                    alert.innerHTML = ''
+                    alert.className = ''
+                }, 3000);
+            }
+        }
+    })
+
+</script>
+
+{{ end }}
