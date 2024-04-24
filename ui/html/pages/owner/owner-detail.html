@@ -23,7 +23,8 @@ Owner Detail
                         <h5 class="my-3">{{ .Owner.LastName }}, {{ .Owner.FirstName }}</h5>
                         <p class="text-muted mb-4">{{ .Owner.Birthdate | birthdate }}</p>
                         <div class="d-flex justify-content-center mb-2">
-                            <a href="/owner/edit/{{ .Owner.Id }}" type="button" class="btn btn-primary ms-2">Edit</a>
+                            <a href="/owner/edit/{{ .Owner.Id }}" type="button" id="owner-edit-btn"
+                                class="btn btn-primary ms-2">Edit</a>
                             <button type="button" class="btn btn-outline-danger ms-2" data-bs-toggle="modal"
                                 data-bs-target="#removeOwnerModal">Remove</button>
                         </div>

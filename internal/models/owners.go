@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"math"
 	"time"
 
 	"pet-clinic.bonglee.com/internal/models/customErrors"
@@ -76,14 +77,18 @@ func (model *OwnerModel) GetOwnersPageLen(pageSize int) (int, error) {
 		return 0, err
 	}
 
-	return rowCount / pageSize, nil
+	pageLen := float64(rowCount) / float64(pageSize)
+
+	return int(math.Ceil(pageLen)), nil
 }
 
 func (model *OwnerModel) GetOwners(page, pageSize int) ([]Owner, error) {
 
 	owners := []Owner{}
 
-	offset := (page - 1) * pageSize
+	offset := page * pageSize
+
+	// 12 owners
 
 	stmt := `
 		SELECT id, firstName, lastName, address, state, city, phone, email, birthdate
@@ -91,7 +96,6 @@ func (model *OwnerModel) GetOwners(page, pageSize int) ([]Owner, error) {
 		LIMIT ?
 		OFFSET ?
 	`
-
 	rows, err := model.DB.Query(stmt, pageSize, offset)
 	if err != nil {
 		return nil, err

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/julienschmidt/httprouter"
 	"pet-clinic.bonglee.com/internal/app"
@@ -24,22 +23,27 @@ func NewVetHandler(app *app.App) *VetHandler {
 }
 
 type vetListForm struct {
-	PageLen int
-	Vets    []models.Vet
+	PageLen  []int
+	PageSize int
+	Vets     []models.Vet
+	LastName string
 }
 
-func (handler *VetHandler) vetList(w http.ResponseWriter, r *http.Request) {
+func (handler *VetHandler) list(w http.ResponseWriter, r *http.Request) {
 
-	pageSizeInt := atoiWithDefault(r.URL.Query().Get("pageSize"), 10)
-	pageInt := atoiWithDefault(r.URL.Query().Get("page"), 1)
+	query := r.URL.Query()
 
-	pageLen, err := handler.Vets.GetVetsPageLen(pageSizeInt)
+	pageSize := atoiWithDefault(query.Get("pageSize"), 5)
+	page := atoiWithDefault(query.Get("page"), 0)
+	isSideList := query.Get("sideList") == "true"
+
+	pageLen, err := handler.Vets.GetAllVetsPageLen(pageSize)
 	if err != nil {
 		handler.ServerError(w, r, err)
 		return
 	}
 
-	vets, err := handler.Vets.GetVets(pageInt, pageSizeInt)
+	vets, err := handler.Vets.GetVets(page, pageSize)
 	if err != nil {
 		handler.ServerError(w, r, err)
 		return
@@ -47,28 +51,30 @@ func (handler *VetHandler) vetList(w http.ResponseWriter, r *http.Request) {
 
 	data := handler.NewTemplateData(r)
 	data.Form = vetListForm{
-		PageLen: pageLen,
-		Vets:    vets,
+		PageLen:  make([]int, pageLen),
+		PageSize: pageSize,
+		Vets:     vets,
 	}
 
-	handler.Render(w, r, http.StatusOK, "vet-list.html", data)
+	if isSideList {
+		handler.RenderPartial(w, r, http.StatusOK, "vet-list-side.html", data)
+		return
+	}
+
+	handler.Render(w, r, http.StatusOK, "vet-list-link.html", data)
 }
 
 type vetDetailForm struct {
-	Id        int
-	FirstName string
-	LastName  string
-	Visits    string
+	Id         int
+	FirstName  string
+	LastName   string
+	VisitsJson string
 }
 
-func (handler *VetHandler) vetDetail(w http.ResponseWriter, r *http.Request) {
+func (handler *VetHandler) detail(w http.ResponseWriter, r *http.Request) {
 
 	params := httprouter.ParamsFromContext(r.Context())
-	vetId, err := strconv.Atoi(params.ByName("id"))
-	if err != nil {
-		handler.ClientError(w, r, http.StatusBadRequest)
-		return
-	}
+	vetId := atoiWithDefault(params.ByName("id"), 0)
 
 	vet, err := handler.Vets.GetById(vetId)
 	if err != nil {
@@ -90,10 +96,10 @@ func (handler *VetHandler) vetDetail(w http.ResponseWriter, r *http.Request) {
 
 	data := handler.NewTemplateData(r)
 	data.Form = vetDetailForm{
-		Id:        vet.Id,
-		FirstName: vet.FirstName,
-		LastName:  vet.LastName,
-		Visits:    string(visitsJson),
+		Id:         vet.Id,
+		FirstName:  vet.FirstName,
+		LastName:   vet.LastName,
+		VisitsJson: string(visitsJson),
 	}
 
 	handler.Render(w, r, http.StatusOK, "vet-detail.html", data)
@@ -105,14 +111,14 @@ type createVetForm struct {
 	validator.Validator `form:"-"`
 }
 
-func (handler *VetHandler) vetCreate(w http.ResponseWriter, r *http.Request) {
+func (handler *VetHandler) createPage(w http.ResponseWriter, r *http.Request) {
 	data := handler.NewTemplateData(r)
 	data.Form = createVetForm{}
 
 	handler.Render(w, r, http.StatusOK, "vet-create.html", data)
 }
 
-func (handler *VetHandler) vetCreatePost(w http.ResponseWriter, r *http.Request) {
+func (handler *VetHandler) createPost(w http.ResponseWriter, r *http.Request) {
 	var form createVetForm
 
 	err := json.NewDecoder(r.Body).Decode(&form)
@@ -145,7 +151,7 @@ type editVetForm struct {
 	validator.Validator `form:"-"`
 }
 
-func (handler *VetHandler) vetEdit(w http.ResponseWriter, r *http.Request) {
+func (handler *VetHandler) edit(w http.ResponseWriter, r *http.Request) {
 	params := httprouter.ParamsFromContext(r.Context())
 	vetId := atoiWithDefault(params.ByName("id"), 0)
 
@@ -163,7 +169,7 @@ func (handler *VetHandler) vetEdit(w http.ResponseWriter, r *http.Request) {
 	handler.Render(w, r, http.StatusOK, "vet-edit.html", data)
 }
 
-func (handler *VetHandler) vetEditPut(w http.ResponseWriter, r *http.Request) {
+func (handler *VetHandler) editPost(w http.ResponseWriter, r *http.Request) {
 	params := httprouter.ParamsFromContext(r.Context())
 
 	id := atoiWithDefault(params.ByName("id"), 0)
@@ -196,7 +202,7 @@ func (handler *VetHandler) vetEditPut(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("HX-Redirect", fmt.Sprintf("/vet/detail/%v", id))
 }
 
-func (handler *VetHandler) vetRemove(w http.ResponseWriter, r *http.Request) {
+func (handler *VetHandler) remove(w http.ResponseWriter, r *http.Request) {
 	params := httprouter.ParamsFromContext(r.Context())
 	id := atoiWithDefault(params.ByName("id"), 0)
 
@@ -210,58 +216,36 @@ func (handler *VetHandler) vetRemove(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("HX-Redirect", "/vet")
 }
 
-type createVisitForm struct {
-	models.CreateVisitDto `json:"visit"`
-	Visits                string
-	validator.Validator   `form:"-"`
-}
+func (handler *VetHandler) getByLastName(w http.ResponseWriter, r *http.Request) {
 
-func (handler *VetHandler) vetCreateVisitPost(w http.ResponseWriter, r *http.Request) {
-	var form createVisitForm
+	query := r.URL.Query()
+
+	page := atoiWithDefault(query.Get("page"), 0)
+	pageSize := atoiWithDefault(query.Get("pageSize"), 3)
+	lastName := query.Get("lastName")
 
 	data := handler.NewTemplateData(r)
 
-	err := json.NewDecoder(r.Body).Decode(&form)
+	vets, err := handler.Vets.GetVetsByLastName(lastName, page, pageSize)
 	if err != nil {
-		data.Alert = app.Alert{MsgType: alertConstants.DANGER, Msg: "Please check to make sure all inputs are correct."}
+		handler.Logger.Error(err.Error())
+		data.Alert = app.Alert{MsgType: alertConstants.DANGER, Msg: "Error while searching vets."}
 		handler.RenderPartial(w, r, http.StatusBadRequest, "alert.html", data)
 		return
 	}
 
-	form.CheckField(validator.NotNilId(form.PetId), "error", "Pet ID could not be found")
-	form.CheckField(validator.NotNilId(form.VetId), "error", "Vet ID could not be found")
-
-	if !form.Validator.Valid() {
-		data.Alert = app.Alert{MsgType: alertConstants.DANGER,
-			Msg: fmt.Sprintf("%v", form.Validator.FieldErrors["error"])}
-		handler.RenderPartial(w, r, http.StatusBadRequest, "alert.html", data)
-		return
-	}
-
-	err = handler.Visits.Create(form.PetId, form.VetId, form.Appointment, form.VisitReason, form.Duration)
+	pageLen, err := handler.Vets.GetVetsPageLenLastName(pageSize, lastName)
 	if err != nil {
 		handler.ServerError(w, r, err)
 		return
 	}
 
-	visits, err := handler.Visits.GetByVetId(form.VetId)
-	if err != nil {
-		data.Alert = app.Alert{MsgType: alertConstants.WARNING, Msg: "Failed to get latests visits."}
-		handler.RenderPartial(w, r, http.StatusBadRequest, "alert.html", data)
-		return
+	data.Form = vetListForm{
+		PageLen:  make([]int, pageLen),
+		PageSize: pageSize,
+		Vets:     vets,
+		LastName: lastName,
 	}
 
-	visitsJson, err := json.Marshal(visits)
-	if err != nil {
-		data.Alert = app.Alert{MsgType: alertConstants.WARNING, Msg: "Failed to get latests visits."}
-		handler.RenderPartial(w, r, http.StatusBadRequest, "alert.html", data)
-		return
-	}
-
-	data.Form = &createVisitForm{
-		Visits: string(visitsJson),
-	}
-
-	data.Alert = app.Alert{MsgType: alertConstants.SUCCESS, Msg: "Appointment created."}
-	handler.RenderPartial(w, r, http.StatusOK, "appt-form.html", data)
+	handler.RenderPartial(w, r, http.StatusOK, "vet-list-side.html", data)
 }

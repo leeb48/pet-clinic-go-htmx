@@ -168,7 +168,8 @@ Owner Edit
                     <input type="date" class="form-control" id="pet-birthdate-input" name="petBirthdate">
                 </td>
                 <td>
-                    <button type="button" onclick="addNewPet()" class="btn btn-outline-success">Add</button>
+                    <button type="button" id="add-pet-btn" onclick="addNewPet()"
+                        class="btn btn-outline-success">Add</button>
                 </td>
             </tr>
 
@@ -195,7 +196,7 @@ Owner Edit
                         value="{{ .Birthdate | YYYYMMDD }}">
                 </td>
                 <td>
-                    <button type="button" id="add-pet-btn" value="{{ .Id }}" onclick="markPetToDelete(event)"
+                    <button type="button" value="{{ .Id }}" id="pet-delete-btn" onclick="markPetToDelete(event)"
                         class="btn btn-outline-danger">X</button>
                 </td>
             </tr>
@@ -216,8 +217,7 @@ Owner Edit
                         value="{{ .Birthdate | YYYYMMDD }}" readonly>
                 </td>
                 <td>
-                    <button type="button" id="add-pet-btn" onclick="deleteRow(this)"
-                        class="btn btn-outline-danger">X</button>
+                    <button type="button" onclick="deleteRow(this)" class="btn btn-outline-danger">X</button>
                 </td>
             </tr>
 
@@ -228,7 +228,7 @@ Owner Edit
         </tbody>
     </table>
 
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="submit" id="owner-edit-submit" class="btn btn-primary">Submit</button>
 </form>
 
 <script>

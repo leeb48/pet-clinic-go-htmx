@@ -165,7 +165,8 @@ Owner Create
                     <input type="date" class="form-control" id="pet-birthdate-input" name="petBirthdate">
                 </td>
                 <td>
-                    <button type="button" onclick="addNewPet()" class="btn btn-outline-success">Add</button>
+                    <button type="button" id="add-pet-btn" onclick="addNewPet()"
+                        class="btn btn-outline-success">Add</button>
                 </td>
             </tr>
 
@@ -177,15 +178,15 @@ Owner Create
                         placeholder="Pet Name" value="{{ .Name }}" readonly>
                 </th>
                 <td>
-                    <input class="form-control-plaintext" type="text" name="petType" value="{{ .PetType }}" readonly>
+                    <input class="form-control-plaintext" id="pet-type-input" type="text" name="petType"
+                        value="{{ .PetType }}" readonly>
                 </td>
                 <td>
                     <input type="date" class="form-control-plaintext" id="pet-birthdate-input" name="petBirthdate"
                         value="{{ .Birthdate | YYYYMMDD }}" readonly>
                 </td>
                 <td>
-                    <button type="button" id="add-pet-btn" onclick="deleteRow(this)"
-                        class="btn btn-outline-danger">X</button>
+                    <button type="button" onclick="deleteRow(this)" class="btn btn-outline-danger">X</button>
                 </td>
             </tr>
             {{ end }}
@@ -193,7 +194,7 @@ Owner Create
         </tbody>
     </table>
 
-    <button type="submit" class="btn btn-primary">Submit</button>
+    <button id="owner-create-submit" type="submit" class="btn btn-primary">Submit</button>
 </form>
 
 <script>

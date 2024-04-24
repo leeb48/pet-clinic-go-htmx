@@ -4,8 +4,10 @@ Owners
 
 {{define "main"}}
 <h1>Owner Page</h1>
-<a href="/owner/create" class="btn btn-primary" role="button">Create New Owner</a>
-<table class="table">
+
+<a id="owner-create-btn" href="/owner/create" class="btn btn-primary" role="button">Create New Owner</a>
+
+<table id="owner-table" class="table">
     <thead>
         <tr>
             <th>Name</th>
@@ -31,6 +33,13 @@ Owners
 </table>
 <nav aria-label="Page navigation example">
     <ul class="pagination" id="owner-pagination">
+        {{ range $i, $v := .Form.PageLen }}
+        <li class="page-item">
+            <button class="page-link" hx-get="/owner?page={{ $i }}" hx-select="#owner-table" hx-target="#owner-table">
+                {{ add $i 1}}
+            </button>
+        </li>
+        {{ end }}
     </ul>
 </nav>
 
@@ -38,8 +47,11 @@ Owners
     const pageLen = '{{ .Form.PageLen }}'
     const pageUl = document.getElementById('owner-pagination')
 
-    for (let i = 0; i <= pageLen; ++i) {
-        const page = `<li class="page-item"><a class="page-link" href="/owner?page=${i + 1}">${i + 1}</a></li>`
+    for (let i = 0; i < pageLen; ++i) {
+        const page = `
+        <li class="page-item">
+            <button class="page-link" hx-get="/owner?page=${i}" hx-select="#owner-table" hx-target="#owner-table">${i + 1}</button>
+        </li>`
         pageUl.insertAdjacentHTML('beforeend', page)
     }
 </script>

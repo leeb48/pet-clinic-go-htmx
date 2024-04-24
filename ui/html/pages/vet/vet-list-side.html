@@ -1,0 +1,53 @@
+{{ define "main" }}
+
+<div id="vet-table-pagination">
+    <table id="vets-table" class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{ range .Form.Vets }}
+            <tr class="vet_row" data-vet-id="{{ .Id }}">
+                <td>
+                    <button class="btn btn-outline-primary" onClick="selectVet(this)" hx-get="/visit/vetId/{{ .Id }}"
+                        hx-target="#visitListData">
+                        {{ .FirstName }} {{ .LastName }}
+                    </button>
+                </td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+
+    {{ $pageSize := .Form.PageSize }}
+    {{ $lastName := .Form.LastName }}
+
+    <nav aria-label="Page navigation example">
+        <ul class="pagination" id="owner-pagination">
+            {{ range $i, $v := .Form.PageLen }}
+            <li class="page-item">
+                <button class="page-link"
+                    hx-get="/vet/search?page={{ $i }}&pageSize={{ $pageSize }}&lastName={{ $lastName }}"
+                    hx-select="#vets-table" hx-target="#vets-table">
+                    {{ add $i 1 }}
+                </button>
+            </li>
+            {{ end }}
+        </ul>
+    </nav>
+
+    <script>
+        function selectVet(row) {
+            for (let vetRow of document.querySelectorAll('.vet_row')) {
+                vetRow.classList.remove('table-success')
+            }
+
+            row.closest('.vet_row').classList.add('table-success')
+        }
+    </script>
+
+</div>
+
+{{ end }}

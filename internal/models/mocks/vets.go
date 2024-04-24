@@ -10,7 +10,7 @@ func (model *VetModel) Insert(firstName, lastName string) (int, error) {
 	return 0, nil
 }
 
-func (model *VetModel) GetVetsPageLen(pageSize int) (int, error) {
+func (model *VetModel) GetAllVetsPageLen(pageSize int) (int, error) {
 
 	return 1, nil
 }
@@ -36,4 +36,14 @@ func (model *VetModel) Update(id int, firstName, lastName string) error {
 func (model *VetModel) Remove(id int) error {
 
 	return nil
+}
+
+func (model *VetModel) GetVetsByLastName(lastName string, page, pageSize int) ([]models.Vet, error) {
+	vets := []models.Vet{}
+
+	return vets, nil
+}
+
+func (model *VetModel) GetVetsPageLenLastName(pageSize int, lastName string) (int, error) {
+	return 0, nil
 }

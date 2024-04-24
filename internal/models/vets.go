@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"math"
 
 	"pet-clinic.bonglee.com/internal/models/customErrors"
 )
@@ -14,11 +15,13 @@ type Vet struct {
 
 type VetModelInterface interface {
 	Insert(firstName, lastName string) (int, error)
-	GetVetsPageLen(pageSize int) (int, error)
+	GetAllVetsPageLen(pageSize int) (int, error)
+	GetVetsPageLenLastName(pageSize int, lastName string) (int, error)
 	GetVets(page, pageSize int) ([]Vet, error)
 	GetById(id int) (Vet, error)
 	Update(id int, firstName, lastName string) error
 	Remove(id int) error
+	GetVetsByLastName(lastName string, page, pageSize int) ([]Vet, error)
 }
 
 type VetModel struct {
@@ -43,7 +46,7 @@ func (model *VetModel) Insert(firstName, lastName string) (int, error) {
 	return int(vetId), nil
 }
 
-func (model *VetModel) GetVetsPageLen(pageSize int) (int, error) {
+func (model *VetModel) GetAllVetsPageLen(pageSize int) (int, error) {
 
 	stmt := `
 		SELECT COUNT(*) FROM vets
@@ -55,15 +58,33 @@ func (model *VetModel) GetVetsPageLen(pageSize int) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+	pageLen := float64(rowCount) / float64(pageSize)
 
-	return rowCount / pageSize, nil
+	return int(math.Ceil(pageLen)), nil
+}
+
+func (model *VetModel) GetVetsPageLenLastName(pageSize int, lastName string) (int, error) {
+	stmt := `
+		SELECT COUNT(*) FROM vets
+		WHERE lastName = ?
+	`
+	var rowCount int
+
+	err := model.DB.QueryRow(stmt, lastName).Scan(&rowCount)
+
+	if err != nil {
+		return 0, err
+	}
+	pageLen := float64(rowCount) / float64(pageSize)
+
+	return int(math.Ceil(pageLen)), nil
 }
 
 func (model *VetModel) GetVets(page, pageSize int) ([]Vet, error) {
 
 	vets := []Vet{}
 
-	offset := (page - 1) * pageSize
+	offset := page * pageSize
 
 	stmt := `
 		SELECT id, firstName, lastName
@@ -138,4 +159,32 @@ func (model *VetModel) Remove(id int) error {
 	}
 
 	return nil
+}
+
+func (model *VetModel) GetVetsByLastName(lastName string, page, pageSize int) ([]Vet, error) {
+	vets := []Vet{}
+
+	stmt := `
+		SELECT id, firstName, lastName
+		FROM vets
+		WHERE lastName = ?
+		LIMIT ?
+		OFFSET ?
+	`
+
+	rows, err := model.DB.Query(stmt, lastName, pageSize, page)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var vet Vet
+		if err := rows.Scan(&vet.Id, &vet.FirstName, &vet.LastName); err != nil {
+			return nil, err
+		}
+
+		vets = append(vets, vet)
+	}
+
+	return vets, nil
 }

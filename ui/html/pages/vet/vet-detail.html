@@ -32,7 +32,7 @@ Vet Detail
                     <div class="card-body">
                         <div id='calendar'></div>
 
-                        <form class="mt-2" hx-post="/vet/visit" id="appt-form" hx-target-4x="#alert"
+                        <form class="mt-2" hx-post="/visit/create" id="appt-form" hx-target-4x="#alert"
                             hx-target-5x="body">
                             <div class="input-group">
                                 <span class="input-group-text">Appt</span>
@@ -48,14 +48,15 @@ Vet Detail
                             </div>
                         </form>
 
-                        <form class="mt-2" hx-post="/pet/search" hx-target="#petList" hx-target-4*="#petList">
+                        <form class="mt-2" hx-post="/pet/search" hx-target="#petList" hx-target-4*="#alert"
+                            hx-target-5x="body">
                             <div class="input-group mb-3">
                                 <span class="input-group-text">Pet Name</span>
                                 <input type="text" class="form-control" placeholder="Pet Name" aria-label="Pet Name"
-                                    name="name" aria-describedby="petName" value="Mangss">
+                                    name="name" aria-describedby="petName" value="">
                                 <span class="input-group-text">Birthdate</span>
                                 <input type="date" class="form-control" aria-label="Birthdate" name="birthdate"
-                                    aria-describedby="birthdate" value="1234-12-12">
+                                    aria-describedby="birthdate" value="">
                                 <button class="btn btn-outline-success" type="submit">Search</button>
                             </div>
                         </form>
@@ -90,7 +91,7 @@ Vet Detail
 {{ end }}
 
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js'></script>
-<script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+<script type="text/javascript" src="/static/js/renderCalendar.js"></script>
 
 <script>
 
@@ -99,7 +100,7 @@ Vet Detail
 
         const pathMapping = {
             '/pet/search': petSearch,
-            '/vet/visit': createVisit,
+            '/visit/create': createVisit,
         }
 
         pathMapping[event.detail.path](params);
@@ -128,7 +129,7 @@ Vet Detail
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        renderCalendar(JSON.parse('{{ .Form.Visits }}'))
+        renderCalendar(JSON.parse('{{ .Form.VisitsJson }}'))
     });
 
     document.addEventListener('htmx:afterSwap', (event) => {
@@ -141,41 +142,7 @@ Vet Detail
                 }, 3000);
             }
         }
-
-        if (elt.id === 'appt-form') {
-            // renderCalendar()
-        }
     })
-
-    function renderCalendar(visits = []) {
-
-        const events = []
-
-        for (const visit of visits) {
-            const startTime = new Date(visit.appointment)
-            events.push({
-                title: visit.petName,
-                start: startTime,
-                end: startTime.setHours(startTime.getHours() + visit.duration),
-            })
-        }
-
-        const calendarEl = document.getElementById('calendar');
-        const calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'timeGridWeek',
-            headerToolbar: {
-                left: 'prev,next',
-                center: 'title',
-                right: 'timeGridWeek,timeGridDay' // user can switch between the two
-            },
-            nowIndicator: true,
-            events,
-            eventClick: function (info) {
-                window.location.href = "/owner/detail/15"
-            }
-        });
-        calendar.render();
-    }
 
 </script>
 

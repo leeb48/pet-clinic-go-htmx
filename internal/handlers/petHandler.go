@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"pet-clinic.bonglee.com/internal/app"
+	"pet-clinic.bonglee.com/internal/constants/alertConstants"
 	"pet-clinic.bonglee.com/internal/models"
 	"pet-clinic.bonglee.com/internal/models/customErrors"
 	"pet-clinic.bonglee.com/internal/validator"
@@ -88,7 +89,9 @@ func (handler *PetHandler) getPetsByNameAndDob(w http.ResponseWriter, r *http.Re
 
 	pets, err := handler.Pets.GetPetsByNameAndDob(form.Name, form.Birthdate)
 	if err != nil {
-		handler.ServerError(w, r, err)
+		handler.Logger.Error(err.Error())
+		data.Alert = app.Alert{MsgType: alertConstants.DANGER, Msg: "Error while searching pet."}
+		handler.RenderPartial(w, r, http.StatusBadRequest, "alert.html", data)
 		return
 	}
 
