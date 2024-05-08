@@ -11,8 +11,12 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/caarlos0/env"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/mysql"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/joho/godotenv"
 	"pet-clinic.bonglee.com/internal/app"
+	"pet-clinic.bonglee.com/internal/constants"
 	"pet-clinic.bonglee.com/internal/handlers"
 	"pet-clinic.bonglee.com/internal/models"
 )
@@ -36,7 +40,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	db, err := openDB(cfg.DSN)
+	dsn := cfg.LOCAL_DSN
+	if cfg.ENV == constants.PROD {
+		dsn = cfg.PROD_DSN
+	}
+	db, err := openDB(dsn)
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
@@ -93,6 +101,26 @@ func openDB(dsn string) (*sql.DB, error) {
 		db.Close()
 		return nil, err
 	}
+
+	driver, err := mysql.WithInstance(db, &mysql.Config{})
+
+	if err != nil {
+		db.Close()
+		return nil, err
+	}
+
+	m, err := migrate.NewWithDatabaseInstance(
+		"file://migrations",
+		"mysql",
+		driver,
+	)
+
+	if err != nil {
+		db.Close()
+		return nil, err
+	}
+
+	m.Steps(11)
 
 	return db, nil
 }

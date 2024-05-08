@@ -1,0 +1,36 @@
+# Use root/example as user/password credentials
+version: '3.1'
+
+services:
+
+  db:
+    image: mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: '1234'
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_USER: 'app'
+      MYSQL_PASSWORD: '1234'
+    volumes:
+      - my-db:/var/lib/mysql
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8081:8080
+  
+  pet-clinic:
+    image: pet-clinic
+    ports:
+      - "7771:7771"
+    environment:
+      ENV: 'PROD'
+    depends_on:
+      - db
+
+# Names our volume
+volumes:
+  my-db:

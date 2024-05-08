@@ -1,0 +1,5 @@
+.vscode
+seleniumTests/
+temp/
+.air.toml
+.gitignore

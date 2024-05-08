@@ -21,8 +21,10 @@ type App struct {
 }
 
 type Config struct {
+	ENV             string `env:"ENV"`
 	Addr            string `env:"ADDR"`
-	DSN             string `env:"DSN"`
+	LOCAL_DSN       string `env:"LOCAL_DSN"`
+	PROD_DSN        string `env:"PROD_DSN"`
 	SessionDuration int    `env:"SESSION_DURATION"`
 	DefaultPetType  int    `env:"DEFAULT_PET_TYPE"`
 }
