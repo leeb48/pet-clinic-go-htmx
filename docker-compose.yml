@@ -24,6 +24,7 @@ services:
   
   pet-clinic:
     image: bongster228/pet-clinic:0.1.0
+    restart: on-failure:5
     ports:
       - "7771:7771"
     environment:
