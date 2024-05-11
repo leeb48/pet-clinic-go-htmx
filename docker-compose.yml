@@ -23,7 +23,7 @@ services:
       - 8081:8080
   
   pet-clinic:
-    image: pet-clinic
+    image: bongster228/pet-clinic:0.1.0
     ports:
       - "7771:7771"
     environment:
